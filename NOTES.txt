@@ -1,0 +1,10 @@
+------- RUN THE GRAMMAR ----------
+cabal run
+> this creates the product.json
+If it only says: 'Up to date' there is nothing changed but the code is still run. (Change main.hs to force a new rebuild)
+
+------- IMPORT TO UNITY -----
+> Remove the "" at the start and end
+> Use https://www.freeformatter.com/json-escape.html and press Unescape
+> Place in Unity (Assets folder)
+> Run Game
