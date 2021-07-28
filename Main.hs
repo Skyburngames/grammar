@@ -19,6 +19,7 @@ import TileModifiers
 import RandomUtils
 import TileBuilder_Neighbour
 import System.Random
+import GrammarV2
 
 
 
@@ -27,8 +28,8 @@ main :: IO ()
 -- main = print ("tile max width:" ++ newRand)
 main = do
     -- ========================== GENERATE A PRODUCT ====================================---
-    generateJSON game1 "C:/Users/kevin/PG_Game/Assets" -- AW-PW
-    -- generateJSON game1 "C:/Users/Kevin/Projecten/UnityProjecten/PG_Game/Assets" -- Laptop
+    -- generateJSON game1 "C:/Users/kevin/PG_Game/Assets" -- AW-PW
+    generateJSON game1 "C:/Users/Kevin/Projecten/UnityProjecten/PG_Game/Assets" -- Laptop
     print(toFloat 20)
 -- ============================= Create the datastructure ===========================================
 grid1 = Grid (generateTiles 5 5)
@@ -52,7 +53,11 @@ finalGrid = runMultipleGridBuilders [
     loopOverTiles (editTile (addEntity (Entity (ObjectId 1) Player)) (Position 0 0))
     ] startGen grid1
 
-room1 = Room (ObjectId 2) finalGrid
+
+-- ============================== GRAMMAR V2 ==============================
+finalGrid2 = runGridBuilder2 (con_position (Position 2 2)) (tb_setTileType Solid) grid1 (mkStdGen 23983)
+
+room1 = Room (ObjectId 2) finalGrid2
 
 -- Create the level that is exported
 level1 = Level "level1" [room1]
