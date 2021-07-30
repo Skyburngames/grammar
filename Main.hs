@@ -59,7 +59,7 @@ finalGrid = runMultipleGridBuilders [
 
 -- ============================== GRAMMAR V2 ==============================
 --finalGrid2 = runGridBuilder2 (con_position (Position 2 4)) (tb_setTileType Solid) grid1 (mkStdGen 23983)
-finalGrid2 = runGridBuilder2 False (con_RandomPosition (0,14) (0,14)) (tb_setTileType Solid) grid1 (mkStdGen 56678)
+finalGrid2 = runGridBuilder2 (con_RandomPosition (0,14) (0,14)) (tb_setTileType Solid) grid1 (mkStdGen 54566)
 
 room1 = Room (ObjectId 2) finalGrid2
 
