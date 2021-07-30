@@ -28,11 +28,14 @@ main :: IO ()
 -- main = print ("tile max width:" ++ newRand)
 main = do
     -- ========================== GENERATE A PRODUCT ====================================---
-    -- generateJSON game1 "C:/Users/kevin/PG_Game/Assets" -- AW-PW
-    generateJSON game1 "C:/Users/Kevin/Projecten/UnityProjecten/PG_Game/Assets" -- Laptop
+    generateJSON game1 "C:/Users/kevin/PG_Game/Assets" -- AW-PW
+    -- generateJSON game1 "C:/Users/Kevin/Projecten/UnityProjecten/PG_Game/Assets" -- Laptop
     print(toFloat 20)
+
+
+
 -- ============================= Create the datastructure ===========================================
-grid1 = Grid (generateTiles 5 5)
+grid1 = Grid (generateTiles 15 15)
 startGen = mkStdGen 68302
 
 finalGrid = runMultipleGridBuilders [
@@ -55,9 +58,14 @@ finalGrid = runMultipleGridBuilders [
 
 
 -- ============================== GRAMMAR V2 ==============================
-finalGrid2 = runGridBuilder2 (con_position (Position 2 2)) (tb_setTileType Solid) grid1 (mkStdGen 23983)
+--finalGrid2 = runGridBuilder2 (con_position (Position 2 4)) (tb_setTileType Solid) grid1 (mkStdGen 23983)
+finalGrid2 = runGridBuilder2 False (con_RandomPosition (0,14) (0,14)) (tb_setTileType Solid) grid1 (mkStdGen 56678)
 
 room1 = Room (ObjectId 2) finalGrid2
+
+
+
+
 
 -- Create the level that is exported
 level1 = Level "level1" [room1]
