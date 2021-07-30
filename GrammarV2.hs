@@ -13,8 +13,9 @@ import GridBuilders
 
 
 -- ======================================== HELPER CLASSES ==========================================
+type TilePosData = (OriginalData,Position,Tile,StdGen) -- OriginalData is always the same for each call provided by the caller, Position, Tile and StdGen are UNIQUE for each call!
 type OriginalData = (Grid, StdGen)
-type TilePosData = (OriginalData,Position,Tile,StdGen)
+
 type TileCondition = TilePosData->Bool
 type TileBuilder = TilePosData->Tile
 
@@ -47,23 +48,12 @@ runGridBuilder2 tileConFunc tileBuilderFunc startGrid startGen = Grid nwTiles
     nwTiles = [[progressTile tile (Position x y) | (x, tile) <- zip[0..] row] | (y, row) <- zip[0..] (tiles startGrid)];
 
     -- Progress a tile based on it position
-    -- Based on uniqueGenCondition: either use the same StdGen in EVERY tileCondition function or generate a new StdGen for each TileCondition
-    {-progressTile::Tile->Position->Tile;
-    progressTile tile pos = if(uniqueGenCondition)
-      then progressTileBasedOnCondition (getGeneratorCon pos) (getGeneratorTB pos) tile pos
-      else progressTileBasedOnCondition startGenCon startGenTB tile pos;-}
-
-
+    -- each call to tileConFunc is provided with a TilePosData in it there is a StdGen that is always the same for ALL calls to tileConFunc and there is a unique StdGen
+    --  vica-versa for TileBuilder
     progressTile::Tile->Position->Tile;
     progressTile tile pos = if(tileConFunc ((startGrid, startGenCon), pos, tile, getGeneratorCon pos))
       then tileBuilderFunc ((startGrid, startGenTB), pos, tile, getGeneratorTB pos)
       else tile;
-
-    -- if the condition function is true then do the tileBuilder function or else use the default tile without altering it.
-    -- 2 StdGens are required, these are used as the StdGen for the tileCondition-function and the tileBuilder-function.
-    --progressTileBasedOnCondition::StdGen->StdGen->Tile->Position->Tile;
-    --progressTileBasedOnCondition genCond genTB progressedTile pos = if(tileConFunc ((startGrid, ), pos, progressedTile, genCond))
-    --  then tileBuilderFunc (startGrid, pos, progressedTile, genTB) else progressedTile;
 
     -- generate 2 new StdGen that are used as the starting points for the tileCondition-functions and the tilebuilder-functions
     startGenCon = fst (split startGen);
