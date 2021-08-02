@@ -1,7 +1,7 @@
 module TileBuilder_Neighbour
 (
     NeighbourData(..),
-    ChanceCalculation(..),
+    --ChanceCalculation(..),
     createNeighbourData,
     editTileBasedOnNeighbour,
     chanceBasedOnConditionNeighbours,
@@ -12,14 +12,15 @@ import RandomUtils
 import System.Random
 import TileBuilders
 import TileModifiers
+import GrammarV2
 
 -- The main functions is called with a subfuction
 
 -- ============================================== TileBuilder Function ========================================-
 editTileBasedOnNeighbour::GridNeighbourBuilder->TileModifier->TileBuilder
-editTileBasedOnNeighbour gridNeighbourBuilder tileFunc grid position tile gen = 
-    if (randomRoll (gridNeighbourBuilder grid nwNeighbourData gen2) gen) 
-        then tileFunc tile 
+editTileBasedOnNeighbour gridNeighbourBuilder tileFunc grid position tile gen =
+    if (randomRoll (gridNeighbourBuilder grid nwNeighbourData gen2) gen)
+        then tileFunc tile
         else tile
     where {
         nwNeighbourData = createNeighbourData position;
@@ -30,7 +31,7 @@ editTileBasedOnNeighbour gridNeighbourBuilder tileFunc grid position tile gen =
 
 -- ============================================== Config functions =========================================-
 chanceBasedOnConditionNeighbours::TileCondition->Float->ChanceCalculation->GridNeighbourBuilder
-chanceBasedOnConditionNeighbours condition chance chanceCalculation grid nbData gen = 
+chanceBasedOnConditionNeighbours condition chance chanceCalculation grid nbData gen =
     calculateChance [totalChanceLeft, totalChanceRight, totalChanceUp, totalChanceDown] chanceCalculation
     -- (totalChanceLeft + totalChanceRight + totalChanceUp + totalChanceDown)
     where {
@@ -41,9 +42,9 @@ chanceBasedOnConditionNeighbours condition chance chanceCalculation grid nbData 
         -- currentTile = getTile grid (current nbData);
 
         getChancedBasedOnConditionMatch::Grid->Position->(Tile->Bool)->Float->Float;
-        getChancedBasedOnConditionMatch grid2 pos con addChance = 
-            if(isPositionInGrid grid2 pos) then 
-                (if (con tile) then addChance 
+        getChancedBasedOnConditionMatch grid2 pos con addChance =
+            if(isPositionInGrid grid2 pos) then
+                (if (con tile) then addChance
                 else 0)
             else 0
             where {
@@ -56,7 +57,7 @@ chanceBasedOnConditionNeighbours condition chance chanceCalculation grid nbData 
 -- ============================================== HELPER CLASSES ========================================-
 type TileCondition = (Tile->Bool)
 type GridNeighbourBuilder = (Grid->NeighbourData->StdGen->Float)
-data ChanceCalculation = Highest| Cumulative | Average deriving (Show)
+-- data ChanceCalculation = Highest| Cumulative | Average deriving (Show)
 
 data NeighbourData = NeighbourData {
     current:: Position,

@@ -6,7 +6,7 @@
 {-
 ============================= GRAMMAR ===========================================
 -}
-module Grammar  
+module Grammar
 (   Game(..),
     GameType(..),
     Level(..),
@@ -23,6 +23,8 @@ module Grammar
     Position(..),
     Vector2(..),
     getTile,
+    getTileRelative,
+    getPositionRelative,
     isPosition,
     isPositionInGrid,
     isWall,
@@ -34,7 +36,7 @@ module Grammar
     clamp01,
     toInt,
     toFloat
-) where 
+) where
 
 -- ============================= IMPORTS =============================
 import GHC.Generics
@@ -75,7 +77,7 @@ data Tile = Tile {
 
 data TileType = Solid | Open deriving (Show, Generic)
 
-data Entity = 
+data Entity =
     Entity {
         entityId:: ObjectId,
         entityType:: EntityType
@@ -119,7 +121,8 @@ data Position = Position {
 
 type Vector2 = (Int, Int)
 
--- ================================== Grid generation ================================== 
+
+-- ================================== Grid generation ==================================
 generateTiles::Int->Int->[[Tile]]
 generateTiles _ 0 = [[]]
 generateTiles width height = if(height == 1) then [generateTilesRow width] else
@@ -143,6 +146,13 @@ getTile grid position = findInTilesPosition allTiles position
         findInTilesPosition (x:[]) findPos = snd x; --NOTE: if position could not be found the last tile is always returned
         findInTilesPosition (x:xs) findPos = if(isPosition (fst x) findPos) then snd x else findInTilesPosition xs findPos
     }
+
+-- Returns the tile relative to originalPos
+getTileRelative::Grid->Position->Vector2->Tile
+getTileRelative grid originalPos offset = getTile grid (getPositionRelative originalPos offset)
+
+getPositionRelative::Position->Vector2->Position
+getPositionRelative originalPos offset = Position ((x originalPos) + fst offset) ((y originalPos) + snd offset)
 
 
 getTilesPosition::Grid->[(Position, Tile)]
