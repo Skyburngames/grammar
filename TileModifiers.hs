@@ -4,15 +4,14 @@
 
 module TileModifiers
 (
-    TileModifier(..),
     setTileType,
     addEntity
 ) where
 
 import Grammar
 
-type TileModifier = (Tile->Tile)
 
+-- ============================================ TILEMODIFIERS =====================================================
 setTileType::TileType->TileModifier
 setTileType nwTileType = \r@(Tile {tileType = tp}) -> r {tileType=nwTileType}
 

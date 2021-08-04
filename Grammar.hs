@@ -7,7 +7,9 @@
 ============================= GRAMMAR ===========================================
 -}
 module Grammar
-(   Game(..),
+(
+    -- ARCHITECTURE --
+    Game(..),
     GameType(..),
     Level(..),
     Room(..),
@@ -19,9 +21,16 @@ module Grammar
     Tile(..),
     Grid(..),
     TileType(..),
-    createTile,
+    -- HELPER CLASSES --
     Position(..),
     Vector2(..),
+    InputData(..),
+    OriginalData(..),
+    TileBuilder(..),
+    TileCondition(..),
+    TileModifier(..),
+    ChanceCalculation(..),
+    createTile,
     getTile,
     getTileRelative,
     getPositionRelative,
@@ -41,6 +50,25 @@ module Grammar
 -- ============================= IMPORTS =============================
 import GHC.Generics
 import System.Random
+
+
+-- ==================================== HELPER CLASSES and TYPES ======================================
+data Position = Position {
+    x:: Int,
+    y:: Int
+}deriving (Show)
+
+type Vector2 = (Int, Int)
+
+-- InputData: OriginalData is always the same for each call provided by the caller, Position, Tile and StdGen are UNIQUE for each call!
+type InputData = (OriginalData,Position,Tile,StdGen) -- the data that is always fed to an TileCondition and TileBuilder
+type OriginalData = (Grid, StdGen)
+type TileBuilder = InputData->Tile
+
+type TileCondition = InputData->Bool
+
+type TileModifier = (Tile->Tile)
+data ChanceCalculation = Highest| Cumulative | Average deriving (Show)
 
 
 -- ============================= Architecture =============================
@@ -113,13 +141,7 @@ toInt x = round x
 toFloat::Int->Float
 toFloat x = fromIntegral x :: Float
 
--- ==================================== HELPER CLASSES and TYPES ======================================
-data Position = Position {
-    x:: Int,
-    y:: Int
-}deriving (Show)
 
-type Vector2 = (Int, Int)
 
 
 -- ================================== Grid generation ==================================

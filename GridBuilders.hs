@@ -1,74 +1,56 @@
-{-
-    - Use these functions to Generate a GridBuilder
-    - A GridBuilder is a function that generates a new Grid
--}
-
 module GridBuilders
 (
-    runMultipleGridBuilders,
-    loopOverTiles,
-    --generateRandomPosition,
-
+  runMultipleGridBuilders2,
+  runGridBuilder2,
 ) where
 
 import Grammar
 import System.Random
-import TileBuilders
 import RandomUtils
 
 
-type GridBuilder = StdGen->Grid->Grid
--- type Condition = Grid->StdGen->[Position]
+
+-- ======================================== GRIDBUILDERS ==========================================
+runMultipleGridBuilders2::OriginalData->[(OriginalData->Grid)]->Grid
+runMultipleGridBuilders2 (startGrid,_) [] = startGrid
+runMultipleGridBuilders2 (startGrid,startGen) (f:fs) = runMultipleGridBuilders2 (nwGrid, nextGen) fs
+  where{
+    nwGrid = f (startGrid, startGen);
+    nextGen = snd (split startGen)
+  }
 
 
+-- Loop over all tiles a call the TileCondition function to check if the action should be performed on this tile,then call the tileBuilder function to alter the tile
+runGridBuilder2::(TileCondition)->(TileBuilder)->OriginalData->Grid
+runGridBuilder2 tileConFunc tileBuilderFunc (startGrid,startGen) = Grid nwTiles
+  where{
+    nwTiles = [[progressTile tile (Position x y) | (x, tile) <- zip[0..] row] | (y, row) <- zip[0..] (tiles startGrid)];
 
-runMultipleGridBuilders::[(GridBuilder)]->GridBuilder
-runMultipleGridBuilders [] _ startGrid = startGrid
-runMultipleGridBuilders (currentFunction: otherFunctions) startGen startGrid = runMultipleGridBuilders otherFunctions gen2 (currentFunction startGen startGrid)
-    where {
-        gen2 = snd (splitStdGen startGen);
-    }
+    -- Progress a tile based on it position
+    -- each call to tileConFunc is provided with a InputData in it there is a StdGen that is always the same for ALL calls to tileConFunc and there is a unique StdGen
+    --  vica-versa for TileBuilder
+    progressTile::Tile->Position->Tile;
+    progressTile tile pos = if(tileConFunc ((startGrid, startGenCon), pos, tile, getGeneratorCon pos))
+      then tileBuilderFunc ((startGrid, startGenTB), pos, tile, getGeneratorTB pos)
+      else tile;
 
+    -- generate 2 new StdGen that are used as the starting points for the tileCondition-functions and the tilebuilder-functions
+    startGenCon = fst (split startGen);
+    startGenTB = snd (split startGen);
 
-loopOverTiles::TileBuilder->GridBuilder
-loopOverTiles tileBuilder gen grid@(Grid {}) =
-    grid {
-        tiles = [[tileBuilder grid (Position x y) tile (getGenerator generators x y)--(mkStdGen ((x * 2) * (y * 9)))
-            | (x, tile) <- zip[0..] row]
-            | (y, row) <- zip[0..] (tiles grid)]
-    } where {
-        -- NOTE: create [stdGen] where each entry is a unique stdGen, then for each tile use one of these stdGen
-        gridWidth = getGridWidth grid;
-        totalTiles = gridWidth * (getGridHeight grid);
-        generators = createGenerators totalTiles gen;
-        getGenerator::[StdGen]->Int->Int->StdGen;
-        getGenerator generators xPos yPos = generators!!((yPos * gridWidth) + xPos)
-            where {
-            gridWidth = getGridWidth grid;
-            totalTiles = gridWidth * (getGridHeight grid)
-        }
-    }
+    -- required basic info
+    gridWidth = getGridWidth startGrid;
+    totalTiles = gridWidth * (getGridHeight startGrid);
 
---generateRandomPosition::StdGen->Position
---generateRandomPosition gen = Position 2 2
+    -- generate totalTiles* StdGen, twice, once for the TileCondition-functions and once for the TileBuilder-functions
+    generatorsCon = createGenerators totalTiles startGenCon;
+    generatorsTileBuilders = createGenerators totalTiles startGenTB;
 
-{-
-createGenerators::Grid->Int->StdGen->[StdGen]
-createGenerators _ 0 _ = []
-createGenerators grid rem g = g:(createGenerators grid (rem-1) (snd (split g)))
--}
-
-{-
-loopOverTilesWithCondition::Condition->TileBuilder->GridBuilder
-loopOverTilesWithCondition condition tileBuilder gen grid@(Grid {}) =
-    grid {
-        tiles = [[tileBuilder grid (Position x y) tile (getGenerator generators x y)--(mkStdGen ((x * 2) * (y * 9)))
-            | (x, tile) <- zip[0..] row]
-            | (y, row) <- zip[0..] (tiles grid)]
-}
-
-condition_allTiles::Condition
-condition_allTiles grid gen = []
--}
-
- -- ================================================== PRIVATE ====================================================== --
+    -- functions to retrieve a StdGen based on the position
+    getGeneratorCon::Position->StdGen;
+    --getGenerator1 pos1 = generators!!((yPos * gridWidth) + xPos);
+    getGeneratorCon pos1 = generatorsCon!!(((y pos1) * gridWidth) + (x pos1));
+    getGeneratorTB::Position->StdGen;
+    --getGenerator2 pos2 = generators!!(((yPos * gridWidth) + xPos) + totalTiles)
+    getGeneratorTB pos2 = generatorsTileBuilders!!(((y pos2) * gridWidth) + (x pos2))
+  }
