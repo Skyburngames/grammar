@@ -1,7 +1,7 @@
 module GridBuilders
 (
-  runMultipleGridBuilders2,
-  runGridBuilder2,
+  runMultipleGridBuilders,
+  runGridBuilder,
 ) where
 
 import Grammar
@@ -11,9 +11,9 @@ import RandomUtils
 
 
 -- ======================================== GRIDBUILDERS ==========================================
-runMultipleGridBuilders2::OriginalData->[(OriginalData->Grid)]->Grid
-runMultipleGridBuilders2 (startGrid,_) [] = startGrid
-runMultipleGridBuilders2 (startGrid,startGen) (f:fs) = runMultipleGridBuilders2 (nwGrid, nextGen) fs
+runMultipleGridBuilders::OriginalData->[(OriginalData->Grid)]->Grid
+runMultipleGridBuilders (startGrid,_) [] = startGrid
+runMultipleGridBuilders (startGrid,startGen) (f:fs) = runMultipleGridBuilders (nwGrid, nextGen) fs
   where{
     nwGrid = f (startGrid, startGen);
     nextGen = snd (split startGen)
@@ -21,8 +21,8 @@ runMultipleGridBuilders2 (startGrid,startGen) (f:fs) = runMultipleGridBuilders2 
 
 
 -- Loop over all tiles a call the TileCondition function to check if the action should be performed on this tile,then call the tileBuilder function to alter the tile
-runGridBuilder2::(TileCondition)->(TileBuilder)->OriginalData->Grid
-runGridBuilder2 tileConFunc tileBuilderFunc (startGrid,startGen) = Grid nwTiles
+runGridBuilder::(TileCondition)->(TileBuilder)->OriginalData->Grid
+runGridBuilder tileConFunc tileBuilderFunc (startGrid,startGen) = Grid nwTiles
   where{
     nwTiles = [[progressTile tile (Position x y) | (x, tile) <- zip[0..] row] | (y, row) <- zip[0..] (tiles startGrid)];
 

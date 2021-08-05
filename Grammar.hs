@@ -36,7 +36,7 @@ module Grammar
     getPositionRelative,
     isPosition,
     isPositionInGrid,
-    isWall,
+    compareTileTypes,
     generateTiles,
     getGridHeight,
     getGridWidth,
@@ -186,13 +186,11 @@ getGridWidth grid = length (head (tiles grid))
 getGridHeight::Grid->Int
 getGridHeight grid = length (tiles grid)
 
-isWall::Tile->Bool
-isWall tile = checkType (tileType tile)
-    where {
-        checkType::TileType->Bool;
-        checkType Solid = True;
-        checkType Open = False
-    }
+
+compareTileTypes::TileType->TileType->Bool;
+compareTileTypes Solid Solid = True;
+compareTileTypes Open Open = True;
+compareTileTypes _ _ = False
 
 isPosition::Position->Position->Bool
 isPosition pos1 pos2 = if ((x pos1) == (x pos2) && (y pos1) == (y pos2)) then True else False

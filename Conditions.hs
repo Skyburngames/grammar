@@ -2,7 +2,9 @@ module Conditions
 (
   con_position,
   con_RandomPosition,
-  con_isWall,
+  con_isTileType,
+  con_gridBorder,
+  con_always,
   con_neighbourTileCondition,
 ) where
 
@@ -15,8 +17,20 @@ import RandomUtils
 con_position::Position->InputData->Bool
 con_position requiredPosition (originalData,p,t,gen) = (isPosition p requiredPosition)
 
-con_isWall::InputData->Bool
-con_isWall (_,_,t,_) = isWall t
+con_always::Bool->InputData->Bool
+con_always alwaysBool (_,_,_,_) = alwaysBool
+
+con_isTileType::TileType->InputData->Bool
+con_isTileType tt (_,_,t,_) = compareTileTypes tt (tileType t)
+
+con_gridBorder::InputData->Bool
+con_gridBorder ((originalGrid,_),position,_,_) = isLeftBorder || isRightBorder || isTopBorder || isBottomBorder
+  where{
+    isLeftBorder = (x position) == 0;
+    isRightBorder = (x position) == ((getGridWidth originalGrid)-1);
+    isTopBorder = (y position) == ((getGridHeight originalGrid)-1);
+    isBottomBorder = (y position) == 0;
+}
 
 
 con_RandomPosition::Vector2->Vector2->InputData->Bool
