@@ -44,7 +44,8 @@ module Grammar
     clamp,
     clamp01,
     toInt,
-    toFloat
+    toFloat,
+    combineGrids
 ) where
 
 -- ============================= IMPORTS =============================
@@ -155,6 +156,14 @@ generateTiles width height = if(height == 1) then [generateTilesRow width] else
         generateTilesRow x = (createTile Open []): generateTilesRow (x-1)
     }
 
+combineGrids::Grid->Grid->Vector2->Grid -- TODO
+combineGrids r@(Grid {tiles=tilesG1}) grid2 connectionPoint = r {tiles = combinedTiles}
+  where {
+    combinedTiles = combineTiles tilesG1 (tiles grid2) connectionPoint
+}
+
+combineTiles::[[Tile]]->[[Tile]]->Vector2->[[Tile]] --TODO
+combineTiles tiles1 tiles2 connectionPoint = tiles1 ++ tiles2
 
 -- ==================================== GET GRID DATA ======================================
 getTile::Grid->Position->Tile -- idea: make faster(?) by using 2x concate and then calc the index with divide/modulo

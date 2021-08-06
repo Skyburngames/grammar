@@ -12,6 +12,7 @@ import Grammar
 
 
 -- ============================================ TILEMODIFIERS =====================================================
+-- setTileType::TileType->Tile->Tile
 setTileType::TileType->TileModifier
 setTileType nwTileType = \r@(Tile {tileType = tp}) -> r {tileType=nwTileType}
 
