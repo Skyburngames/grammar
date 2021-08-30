@@ -25,7 +25,8 @@ module Grammar
     Position(..),
     Vector2(..),
     InputData(..),
-    OriginalData(..),
+    GridBuilderData(..),
+    -- OriginalData(..),
     TileBuilder(..),
     TileCondition(..),
     TileModifier(..),
@@ -61,9 +62,10 @@ data Position = Position {
 
 type Vector2 = (Int, Int)
 
+type GridBuilderData = (Grid, StdGen)
 -- InputData: OriginalData is always the same for each call provided by the caller, Position, Tile and StdGen are UNIQUE for each call!
-type InputData = (OriginalData,Position,Tile,StdGen) -- the data that is always fed to an TileCondition and TileBuilder
-type OriginalData = (Grid, StdGen)
+type InputData = (Grid,Position,Tile,StdGen) -- the data that is always fed to an TileCondition and TileBuilder
+-- type OriginalData = (Grid)
 type TileBuilder = InputData->Tile
 
 type TileCondition = InputData->Bool

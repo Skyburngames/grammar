@@ -30,40 +30,42 @@ startGen = mkStdGen 902727
 startOriginalData = (startGrid, startGen)
 
 result1 = runMultipleGridBuilders startOriginalData [
-  runGridBuilder (con_RandomPosition (1,4) (1,4)) (tb_editTile (setTileType Solid)),
-  --runGridBuilder (con_RandomPosition (1,9) (1,9)) (tb_editTile (setTileType Solid)),
-  --runGridBuilder (con_RandomPosition (1,9) (1,9)) (tb_editTile (setTileType Solid)),
-  runGridBuilder (con_neighbourTileCondition (con_isTileType Solid) 1 Cumulative) (tb_editTile (setTileType Solid)),
-  runGridBuilder (con_gridBorder) (tb_editTile (setTileType Solid)),
-  runGridBuilder (con_RandomPosition (2,3) (2,3)) (tb_editTile ((addEntity (Entity (ObjectId 1) Player)).(setTileType Open)))
+  -- gb_randomTile (0,4) (0,4) (tb_editTile (setTileType Solid)),
+  --gb_allTiles (con_RandomPosition (1,9) (1,9)) (tb_editTile (setTileType Solid)),
+  --gb_allTiles (con_RandomPosition (1,9) (1,9)) (tb_editTile (setTileType Solid)),
+  gb_randomTile (2,2) (2,2) (tb_editTile (setTileType Solid)),
+  gb_allTiles (con_neighbourTileCondition (con_isTileType Solid) 0.6 Cumulative) (tb_editTile (setTileType Solid)),
+  gb_allTiles (con_neighbourTileCondition (con_isTileType Solid) 0.6 Cumulative) (tb_editTile (setTileType Solid)),
+  --gb_allTiles (con_gridBorder) (tb_editTile (setTileType Solid)),
+  gb_randomTile (0,0) (0,0) (tb_editTile ((addEntity (Entity (ObjectId 1) Player)).(setTileType Open)))
   ]
 
 result2 = runMultipleGridBuilders startOriginalData [
-  runGridBuilder (con_RandomPosition (1,4) (1,4)) (tb_editTile (setTileType Solid)),
-  --runGridBuilder (con_RandomPosition (1,4) (1,4)) (tb_editTile (setTileType Solid)),
-  --runGridBuilder (con_RandomPosition (1,4) (1,4)) (tb_editTile (setTileType Solid)),
-  runGridBuilder (con_neighbourTileCondition (con_isTileType Solid) 0.5 Cumulative) (tb_editTile (setTileType Solid)),
-  runGridBuilder (con_neighbourTileCondition (con_isTileType Solid) 0.4 Cumulative) (tb_editTile (setTileType Solid)),
-  runGridBuilder (con_neighbourTileCondition (con_isTileType Solid) 0.3 Cumulative) (tb_editTile (setTileType Solid)),
-  runGridBuilder (con_neighbourTileCondition (con_isTileType Solid) 0.2 Cumulative) (tb_editTile (setTileType Solid)),
-  runGridBuilder (con_neighbourTileCondition (con_isTileType Solid) 0.1 Cumulative) (tb_editTile (setTileType Solid)),
-  runGridBuilder (con_neighbourTileCondition (con_isTileType Solid) 0.1 Cumulative) (tb_editTile (setTileType Solid)),
-  runGridBuilder (con_gridBorder) (tb_editTile (setTileType Solid))
-  -- runGridBuilder (con_RandomPosition (2,3) (2,3)) (tb_editTile ((addEntity (Entity (ObjectId 1) Player)).(setTileType Open)))
+  gb_randomTile (1,4) (1,4) (tb_editTile (setTileType Solid)),
+  --gb_allTiles (con_RandomPosition (1,4) (1,4)) (tb_editTile (setTileType Solid)),
+  --gb_allTiles (con_RandomPosition (1,4) (1,4)) (tb_editTile (setTileType Solid)),
+  gb_allTiles (con_neighbourTileCondition (con_isTileType Solid) 0.5 Cumulative) (tb_editTile (setTileType Solid)),
+  gb_allTiles (con_neighbourTileCondition (con_isTileType Solid) 0.4 Cumulative) (tb_editTile (setTileType Solid)),
+  gb_allTiles (con_neighbourTileCondition (con_isTileType Solid) 0.3 Cumulative) (tb_editTile (setTileType Solid)),
+  gb_allTiles (con_neighbourTileCondition (con_isTileType Solid) 0.2 Cumulative) (tb_editTile (setTileType Solid)),
+  gb_allTiles (con_neighbourTileCondition (con_isTileType Solid) 0.1 Cumulative) (tb_editTile (setTileType Solid)),
+  gb_allTiles (con_neighbourTileCondition (con_isTileType Solid) 0.1 Cumulative) (tb_editTile (setTileType Solid)),
+  gb_allTiles (con_gridBorder) (tb_editTile (setTileType Solid))
+  -- gb_allTiles (con_RandomPosition (2,3) (2,3)) (tb_editTile ((addEntity (Entity (ObjectId 1) Player)).(setTileType Open)))
   ]
 
 result3 = runMultipleGridBuilders startOriginalData [
-    runGridBuilder (con_always True) (tb_editTile (setTileType Solid)),
-    runGridBuilder (con_RandomPosition (4,4) (6,6)) (tb_editTile (setTileType Open)),
-    runGridBuilder (con_neighbourTileCondition (con_isTileType Open) 1 Cumulative) (tb_editTile (setTileType Open)),
-    runGridBuilder (con_neighbourTileCondition (con_isTileType Open) 0.5 Cumulative) (tb_editTile (setTileType Open)),
-    runGridBuilder (con_neighbourTileCondition (con_isTileType Open) 0.4 Cumulative) (tb_editTile (setTileType Open)),
-    runGridBuilder (con_neighbourTileCondition (con_isTileType Open) 0.3 Cumulative) (tb_editTile (setTileType Open)),
-    runGridBuilder (con_neighbourTileCondition (con_isTileType Open) 0.2 Cumulative) (tb_editTile (setTileType Open)),
-    runGridBuilder (con_neighbourTileCondition (con_isTileType Open) 0.1 Cumulative) (tb_editTile (setTileType Open)),
-    runGridBuilder (con_neighbourTileCondition (con_isTileType Open) 0.1 Cumulative) (tb_editTile (setTileType Open)),
-    runGridBuilder (con_RandomPosition (4,4) (6,6)) (tb_editTile ((addEntity (Entity (ObjectId 1) Player)).(setTileType Open))),
-    runGridBuilder (con_gridBorder) (tb_editTile (setTileType Solid))
+    gb_allTiles (con_always True) (tb_editTile (setTileType Solid)),
+    gb_randomTile (4,4) (2,2) (tb_editTile (setTileType Open)),
+    gb_allTiles (con_neighbourTileCondition (con_isTileType Open) 1 Cumulative) (tb_editTile (setTileType Open)),
+    gb_allTiles (con_neighbourTileCondition (con_isTileType Open) 0.5 Cumulative) (tb_editTile (setTileType Open)),
+    gb_allTiles (con_neighbourTileCondition (con_isTileType Open) 0.4 Cumulative) (tb_editTile (setTileType Open)),
+    gb_allTiles (con_neighbourTileCondition (con_isTileType Open) 0.3 Cumulative) (tb_editTile (setTileType Open)),
+    gb_allTiles (con_neighbourTileCondition (con_isTileType Open) 0.2 Cumulative) (tb_editTile (setTileType Open)),
+    gb_allTiles (con_neighbourTileCondition (con_isTileType Open) 0.1 Cumulative) (tb_editTile (setTileType Open)),
+    gb_allTiles (con_neighbourTileCondition (con_isTileType Open) 0.1 Cumulative) (tb_editTile (setTileType Open)),
+    gb_randomTile (4,4) (0,0) (tb_editTile ((addEntity (Entity (ObjectId 1) Player)).(setTileType Open))),
+    gb_allTiles (con_gridBorder) (tb_editTile (setTileType Solid))
   ]
 
 combinedGrids = combineGrids result1 result2 (0,1)
