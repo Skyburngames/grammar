@@ -165,13 +165,43 @@ combineGrids r@(Grid {tiles=tilesG1}) grid2 connectionPoint = r {tiles = combine
 }
 
 combineTiles::[[Tile]]->[[Tile]]->Vector2->[[Tile]] --TODO
-combineTiles tiles1 tiles2 connectionPoint = tiles1 ++ tiles2
+-- combineTiles tiles1 tiles2 connectionPoint = tiles1 ++ tiles2
+combineTiles tiles1 tiles2 connectionPoint = afterAddingTiles2
+  where{
+    connectionX = fst connectionPoint;
+    connectionY = snd connectionPoint;
+    w1 = getGridWidth tiles1;
+    h1 = getGridHeight tiles1;
+    w2 = getGridWidth tiles2;
+    h2 = getGridHeight tiles2;
+    totalWidth = (max w1 w2) + abs connectionX;
+    totalHeight = (max h1 h2) + abs connectionY;
+    emptyTiles = generateTiles totalWidth totalHeight;
+    t1StartX = totalWidth - w1 - connectionX;
+    t1StartY = totalHeight - h1 - connectionY;
+    --afterAddingTiles1 = addTiles emptyTiles tiles1 (t1StartX, t1StartY);
+    -- afterAddingTiles2 = addTiles afterAddingTiles1 tiles2 (t1StartX + connectionX, t1StartY + connectionY);
+
+    afterAddingTiles1 = addTiles emptyTiles tiles1 (0,0);
+    afterAddingTiles2 = addTiles afterAddingTiles1 tiles2 connectionPoint;
+}
+
+addTiles::[[Tile]]->[[Tile]]->Vector2->[[Tile]]
+addTiles originalTiles nwTiles (startX, startY) = [[progressTile tile (x,y) | (x, tile) <- zip[0..] row] | (y, row) <- zip[0..] originalTiles]
+  where {
+    w = getGridWidth originalTiles;
+    h = getGridHeight originalTiles;
+    progressTile::Tile->Vector2->Tile;
+    progressTile tile (curX, curY) = if (curX >= startX && curY >= startY && curX < w && curY < h) --also catch on curX < originalTiles.width and curY < originalTiles.height
+      then getTile nwTiles (Position (curX-startX) (curY-startY)) -- tile is in nwTiles
+      else getTile originalTiles (Position curX curY) --tile is in originalTiles
+  }
 
 -- ==================================== GET GRID DATA ======================================
-getTile::Grid->Position->Tile -- idea: make faster(?) by using 2x concate and then calc the index with divide/modulo
-getTile grid position = findInTilesPosition allTiles position
+getTile::[[Tile]]->Position->Tile -- idea: make faster(?) by using 2x concate and then calc the index with divide/modulo
+getTile tiles position = findInTilesPosition allTiles position
     where {
-        allTiles = getTilesPosition grid;
+        allTiles = getTilesPosition tiles;
         posX = (x position);
         posY = (y position);
 
@@ -182,20 +212,28 @@ getTile grid position = findInTilesPosition allTiles position
 
 -- Returns the tile relative to originalPos
 getTileRelative::Grid->Position->Vector2->Tile
-getTileRelative grid originalPos offset = getTile grid (getPositionRelative originalPos offset)
+getTileRelative grid originalPos offset = getTile (tiles grid) (getPositionRelative originalPos offset)
 
 getPositionRelative::Position->Vector2->Position
 getPositionRelative originalPos offset = Position ((x originalPos) + fst offset) ((y originalPos) + snd offset)
 
 
-getTilesPosition::Grid->[(Position, Tile)]
-getTilesPosition grid = concat [[((Position x y), tile)|(x, tile) <- zip[0..] row]|(y, row) <- zip[0..] (tiles grid)]
+getTilesPosition::[[Tile]]->[(Position, Tile)]
+getTilesPosition tiles = concat [[((Position x y), tile)|(x, tile) <- zip[0..] row]|(y, row) <- zip[0..] tiles]
 
-getGridWidth::Grid->Int
+getGridWidth::[[Tile]]->Int
+getGridWidth tiles = length (head tiles)
+
+getGridHeight::[[Tile]]->Int
+getGridHeight tiles = length tiles
+
+{-
+getGridWidth::[Grid]->Int
 getGridWidth grid = length (head (tiles grid))
 
 getGridHeight::Grid->Int
 getGridHeight grid = length (tiles grid)
+-}
 
 
 compareTileTypes::TileType->TileType->Bool;

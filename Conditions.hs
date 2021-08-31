@@ -27,8 +27,8 @@ con_gridBorder::InputData->Bool
 con_gridBorder ((originalGrid),position,_,_) = isLeftBorder || isRightBorder || isTopBorder || isBottomBorder
   where{
     isLeftBorder = (x position) == 0;
-    isRightBorder = (x position) == ((getGridWidth originalGrid)-1);
-    isTopBorder = (y position) == ((getGridHeight originalGrid)-1);
+    isRightBorder = (x position) == ((getGridWidth (tiles originalGrid))-1);
+    isTopBorder = (y position) == ((getGridHeight (tiles originalGrid))-1);
     isBottomBorder = (y position) == 0;
 }
 

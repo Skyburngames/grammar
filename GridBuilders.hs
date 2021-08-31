@@ -51,8 +51,8 @@ gb_allTiles tileConFunc tileBuilderFunc (startGrid,startGen) = Grid nwTiles
     startGenTB = snd (split startGen);
 
     -- required basic info
-    gridWidth = getGridWidth startGrid;
-    totalTiles = gridWidth * (getGridHeight startGrid);
+    gridWidth = getGridWidth (tiles startGrid);
+    totalTiles = gridWidth * (getGridHeight (tiles startGrid));
 
     -- generate totalTiles* StdGen, twice, once for the TileCondition-functions and once for the TileBuilder-functions
     generatorsCon = createGenerators totalTiles startGenCon;
