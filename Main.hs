@@ -68,7 +68,7 @@ result3 = runMultipleGridBuilders startOriginalData [
     gb_allTiles (con_gridBorder) (tb_editTile (setTileType Solid))
   ]
 
-combinedGrids = combineGrids result1 result2 (5,0)
+combinedGrids = combineGrids result1 result2 (15,12)
 room1 = Room (ObjectId 2) combinedGrids
 
 -- Create the level that is exported

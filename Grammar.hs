@@ -179,20 +179,22 @@ combineTiles tiles1 tiles2 connectionPoint = afterAddingTiles2
     emptyTiles = generateTiles totalWidth totalHeight;
     t1StartX = totalWidth - w1 - connectionX;
     t1StartY = totalHeight - h1 - connectionY;
-    --afterAddingTiles1 = addTiles emptyTiles tiles1 (t1StartX, t1StartY);
-    -- afterAddingTiles2 = addTiles afterAddingTiles1 tiles2 (t1StartX + connectionX, t1StartY + connectionY);
 
-    afterAddingTiles1 = addTiles emptyTiles tiles1 (0,0);
-    afterAddingTiles2 = addTiles afterAddingTiles1 tiles2 connectionPoint;
+    afterAddingTiles1 = addTiles emptyTiles tiles1 (calcStartPosTile1 connectionX , calcStartPosTile1 connectionY);
+    afterAddingTiles2 = addTiles afterAddingTiles1 tiles2 (calcStartPosTile2 connectionX , calcStartPosTile2 connectionY);
+    calcStartPosTile1::Int->Int;
+    calcStartPosTile1 v = if v >= 0 then 0 else -v;
+    calcStartPosTile2::Int->Int;
+    calcStartPosTile2 v = if v > 0 then v else 0;
 }
 
 addTiles::[[Tile]]->[[Tile]]->Vector2->[[Tile]]
 addTiles originalTiles nwTiles (startX, startY) = [[progressTile tile (x,y) | (x, tile) <- zip[0..] row] | (y, row) <- zip[0..] originalTiles]
   where {
-    w = getGridWidth originalTiles;
-    h = getGridHeight originalTiles;
+    w = getGridWidth nwTiles;
+    h = getGridHeight nwTiles;
     progressTile::Tile->Vector2->Tile;
-    progressTile tile (curX, curY) = if (curX >= startX && curY >= startY && curX < w && curY < h) --also catch on curX < originalTiles.width and curY < originalTiles.height
+    progressTile tile (curX, curY) = if (curX >= startX && curY >= startY && curX < (startX+ w) && curY < (startY+h)) --also catch on curX < originalTiles.width and curY < originalTiles.height
       then getTile nwTiles (Position (curX-startX) (curY-startY)) -- tile is in nwTiles
       else getTile originalTiles (Position curX curY) --tile is in originalTiles
   }
