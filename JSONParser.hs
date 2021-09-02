@@ -2,10 +2,10 @@
 {-# LANGUAGE DeriveGeneric #-} -- must be set BEFORE 'module Main where'
 {-# LANGUAGE OverloadedStrings #-} -- must be set BEFORE 'module Main where'
 
-module JSONParser  
+module JSONParser
 (
     generateJSON
-) where 
+) where
 
 -- ============================= IMPORTS =============================
 import Grammar
@@ -23,11 +23,15 @@ instance ToJSON JSONParser.Grid
 instance ToJSON JSONParser.Tile
 instance ToJSON GridPositionJSON
 
+
 instance ToJSON GameType
 instance ToJSON TileType
 instance ToJSON Entity
 instance ToJSON EntityType
 instance ToJSON ObjectId
+instance ToJSON Alignment
+instance ToJSON Position
+instance ToJSON RoomConnector
 
 -- ================================= JSON types ================================
 data Game = Game {
@@ -38,7 +42,8 @@ data Game = Game {
 
 data Level = Level {
     name:: String,
-    rooms:: [JSONParser.Room]
+    rooms:: [JSONParser.Room],
+    roomConnections:: [RoomConnector]
 } deriving (Show, Generic)
 
 
@@ -47,6 +52,15 @@ data Room = Room {
     grid:: JSONParser.Grid
 } deriving (Show, Generic)
 
+{-
+data RoomConnector = RoomConnector {
+    room1:: ObjectId,
+    room2:: ObjectId,
+    r1ConnectionPoint::GridPositionJSON,
+    r2ConnectionPoint::GridPositionJSON,
+    aligmentPreference::Alignment
+} deriving (Show, Generic)
+-}
 
 data Grid = Grid {
     tiles:: [JSONParser.Tile]
@@ -72,18 +86,21 @@ convertGame::Grammar.Game->JSONParser.Game
 convertGame game = JSONParser.Game (map convertLevel (Grammar.levels game)) (Grammar.gameType game)
 
 convertLevel::Grammar.Level->JSONParser.Level
-convertLevel level = JSONParser.Level (Grammar.name level) (map convertRoom (Grammar.rooms level))
+convertLevel level = JSONParser.Level (Grammar.name level) (map convertRoom (Grammar.rooms level)) (Grammar.roomConnections level)   --(map convertRoomConnector (Grammar.roomConnections level))
 
 convertRoom::Grammar.Room->JSONParser.Room
 convertRoom room = JSONParser.Room (Grammar.roomId room) (convertGrid (Grammar.grid room))
+
+-- convertRoomConnector::Grammar.RoomConnector->JSONParser.RoomConnector
+-- convertRoomConnector rc = JSONParser.RoomConnector (Grammar.room1 rc) (Grammar.room2 rc) (Grammar.r1ConnectionPoint rc) (Grammar.r2ConnectionPoint rc) (Grammar.aligmentPreference rc)
 
 convertGrid::Grammar.Grid->JSONParser.Grid
 convertGrid grid = JSONParser.Grid (convert2DTiles (Grammar.tiles grid))
 
 convert2DTiles::[[Grammar.Tile]]->[JSONParser.Tile]
 convert2DTiles [] = []
---convert2DTiles rows = [(convertTile tile x y) | (x,row) <- zip[0..] rows, (y,tile) <- zip[0..] row] 
-convert2DTiles rows = [(convertTile tile x y) | (y,row) <- zip[0..] rows, (x,tile) <- zip[0..] row] 
+--convert2DTiles rows = [(convertTile tile x y) | (x,row) <- zip[0..] rows, (y,tile) <- zip[0..] row]
+convert2DTiles rows = [(convertTile tile x y) | (y,row) <- zip[0..] rows, (x,tile) <- zip[0..] row]
 
 convertTile::Grammar.Tile->Int->Int->JSONParser.Tile
 convertTile tile posX posY = JSONParser.Tile (GridPositionJSON posX posY) (Grammar.tileType tile) (Grammar.entities tile)
@@ -101,7 +118,7 @@ generateJSON nwGame fileLocation = do
 
     when (Prelude.length escapedVersion > 0) $
         writeFile (fileLocation ++ "/product.json") escapedVersion
-        
+
 
 firstLast::[a]->[a]
 firstLast [] = []

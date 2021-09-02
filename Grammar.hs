@@ -13,8 +13,8 @@ module Grammar
     GameType(..),
     Level(..),
     Room(..),
-    Rule(..),
     RoomConnector(..),
+    Rule(..),
     Entity(..),
     EntityType(..),
     ObjectId(..),
@@ -31,6 +31,7 @@ module Grammar
     TileCondition(..),
     TileModifier(..),
     ChanceCalculation(..),
+    Alignment(..),
     createTile,
     getTile,
     getTileRelative,
@@ -58,7 +59,7 @@ import System.Random
 data Position = Position {
     x:: Int,
     y:: Int
-}deriving (Show)
+}deriving (Show, Generic)
 
 type Vector2 = (Int, Int)
 
@@ -73,6 +74,8 @@ type TileCondition = InputData->Bool
 type TileModifier = (Tile->Tile)
 data ChanceCalculation = Highest| Cumulative | Average deriving (Show)
 
+data Alignment = Horizontal | Vertical deriving (Show, Generic)
+
 
 -- ============================= Architecture =============================
 data Game = Game {
@@ -86,13 +89,22 @@ data GameType = FPS| TopDown deriving (Show, Generic)
 
 data Level = Level {
     name:: String,
-    rooms:: [Room]
+    rooms:: [Room],
+    roomConnections:: [RoomConnector]
 } deriving (Show, Generic)
 
 
 data Room = Room {
     roomId:: ObjectId,
     grid:: Grid
+} deriving (Show, Generic)
+
+data RoomConnector = RoomConnector {
+    room1:: ObjectId,
+    room2:: ObjectId,
+    r1ConnectionPoint::Position,
+    r2ConnectionPoint::Position,
+    aligmentPreference::Alignment
 } deriving (Show, Generic)
 
 data Grid = Grid {
@@ -257,9 +269,3 @@ createTile tileType entitiesTile = Tile tileType entitiesTile
 
 -- =================================== NOT USED ================================
 data Rule = Rule deriving (Show)
-
-data RoomConnector = RoomConnector {
-    -- roomConnectorType:: RoomConnectorType,
-    roomId1:: ObjectId,
-    roomId2:: ObjectId
-} deriving (Show, Generic)
