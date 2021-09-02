@@ -37,7 +37,7 @@ module Grammar
     getTileRelative,
     getPositionRelative,
     isPosition,
-    isPositionInGrid,
+    -- isPositionInGrid,
     compareTileTypes,
     generateTiles,
     getGridHeight,
@@ -258,8 +258,10 @@ compareTileTypes _ _ = False
 isPosition::Position->Position->Bool
 isPosition pos1 pos2 = if ((x pos1) == (x pos2) && (y pos1) == (y pos2)) then True else False
 
+{-
 isPositionInGrid::Grid->Position->Bool
 isPositionInGrid grid pos = True
+-}
 
 -- ============================ Smart constructors =========================================
 createTile::TileType->[Entity]->Tile
