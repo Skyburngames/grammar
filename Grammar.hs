@@ -102,8 +102,8 @@ data Room = Room {
 data RoomConnector = RoomConnector {
     room1:: ObjectId,
     room2:: ObjectId,
-    r1ConnectionPoint::Position,
-    r2ConnectionPoint::Position,
+    r1ConnectionPoint::Position, -- the position in this room where the door is located (from bottom left)
+    r2ConnectionPoint::Position, -- the position in this room where the door is located (from bottom left)
     aligmentPreference::Alignment
 } deriving (Show, Generic)
 
