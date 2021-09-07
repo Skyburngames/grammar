@@ -22,10 +22,6 @@ createDoorsLevel level = Level (name level) (nwRooms (rooms level)) _roomConnect
     nwRooms::[Room]->[Room];
     nwRooms rooms = [createDoorsRoom r _roomConnections|r<- rooms]
 }
-
-
-
-
 -- ======================================== PRIVATE ==============================================
 createDoorsRoom::Room->[RoomConnector]->Room
 createDoorsRoom room roomConnections = Room (roomId room) (nwGrid (grid room))
@@ -37,16 +33,6 @@ createDoorsRoom room roomConnections = Room (roomId room) (nwGrid (grid room))
       -- tilesAfterDoorsR2 = (createDoors tilesAfterDoorsR1 (getRoomConnectionsRoom room roomConnections))
   }
 }
-{-
-createDoors2::[[Tile]]->[RoomConnector]->[[Tile]]
-createDoors2 tiles roomConnections = nwTiles
-  where{
-    nwTiles = [[progressTile tile (Position x y) | (x, tile) <- zip[0..] row] | (y, row) <- zip[0..] tiles];
-    progressTile tile pos = if(isPositionDoor pos roomConnections)
-      then (setTileType Open tile)
-      else tile;
-}
--}
 
 createDoors::[[Tile]]->[Position]->[[Tile]]
 createDoors tiles doorPositions = nwTiles
@@ -56,8 +42,6 @@ createDoors tiles doorPositions = nwTiles
       then (setTileType Open tile)
       else tile;
 }
-
-
 
 getDoorPositions::Room->[RoomConnector]->[Position]
 getDoorPositions room roomConnections = [(getConnectionPoint rc)|rc<-roomConnections, objectIdInRoomConnector rc _roomId]
@@ -78,6 +62,16 @@ isPositionInList pos (cur_pos:otherPos) =
     else isPositionInList pos otherPos
 
 
+    {-
+    createDoors2::[[Tile]]->[RoomConnector]->[[Tile]]
+    createDoors2 tiles roomConnections = nwTiles
+      where{
+        nwTiles = [[progressTile tile (Position x y) | (x, tile) <- zip[0..] row] | (y, row) <- zip[0..] tiles];
+        progressTile tile pos = if(isPositionDoor pos roomConnections)
+          then (setTileType Open tile)
+          else tile;
+    }
+    -}
 
 
 
