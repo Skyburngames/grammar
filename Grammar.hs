@@ -21,6 +21,7 @@ module Grammar
     Tile(..),
     Grid(..),
     TileType(..),
+    GeneratedLevel(..),
     -- HELPER CLASSES --
     Position(..),
     Vector2(..),
@@ -78,8 +79,10 @@ data Alignment = Horizontal | Vertical deriving (Show, Generic)
 
 
 -- ============================= Architecture =============================
+
+-- --------------------------------- LayoutLayer -----------------------------------------
 data Game = Game {
-    levels :: [Level],
+    levels :: [GeneratedLevel],
     gameType :: GameType
 } deriving (Show, Generic)
 
@@ -137,6 +140,14 @@ data EntityType = Enemy| Powerup | Player deriving (Show, Generic)
 
 newtype ObjectId = ObjectId {
     objectId :: Int
+} deriving (Show, Generic)
+
+
+
+-- --------------------------------- GridLayer -----------------------------------------
+data GeneratedLevel = GeneratedLevel {
+  gl_name:: String,
+  gl_grid:: Grid
 } deriving (Show, Generic)
 
 -- ======================================= HELPER FUNCTIONS ===========================================

@@ -9,6 +9,7 @@ import TileBuilders
 import TileModifiers
 import Conditions
 import RoomConnectionGenerator
+import GenerateLevel
 
 import RandomUtils
 import System.Random
@@ -96,4 +97,5 @@ connectR2withR4 = connectRoomVertical generatedRoom2 generatedRoom4
 -- Create the level that is exported
 level1WithoutDoors = Level "level1" [generatedRoom1, generatedRoom2, generatedRoom3, generatedRoom4] [connectR1withR2, connectR2withR3, connectR2withR4]
 level1WithDoors = createDoorsLevel level1WithoutDoors
-game1 = Game [level1WithDoors] TopDown
+generatedLevel1 = generateLevel level1WithDoors
+game1 = Game [generatedLevel1] TopDown
