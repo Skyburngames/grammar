@@ -32,7 +32,7 @@ module Grammar
     TileCondition(..),
     TileModifier(..),
     ChanceCalculation(..),
-    Alignment(..),
+    -- Alignment(..),
     createTile,
     getTile,
     getTileRelative,
@@ -40,7 +40,7 @@ module Grammar
     isPosition,
     -- isPositionInGrid,
     compareTileTypes,
-    generateTiles,
+    -- generateTiles,
     getGridHeight,
     getGridWidth,
     getMax,
@@ -48,7 +48,8 @@ module Grammar
     clamp01,
     toInt,
     toFloat,
-    combineGrids
+    combineGrids,
+    createRoom,
 ) where
 
 -- ============================= IMPORTS =============================
@@ -75,7 +76,7 @@ type TileCondition = InputData->Bool
 type TileModifier = (Tile->Tile)
 data ChanceCalculation = Highest| Cumulative | Average deriving (Show)
 
-data Alignment = Horizontal | Vertical deriving (Show, Generic)
+-- data Alignment = Horizontal | Vertical deriving (Show, Generic)
 
 
 -- ============================= Architecture =============================
@@ -105,9 +106,10 @@ data Room = Room {
 data RoomConnector = RoomConnector {
     room1:: ObjectId,
     room2:: ObjectId,
-    r1ConnectionPoint::Position, -- the position in this room where the door is located (from bottom left)
-    r2ConnectionPoint::Position, -- the position in this room where the door is located (from bottom left)
-    aligmentPreference::Alignment
+    -- r1ConnectionPoint::Position, -- the position in this room where the door is located (from bottom left)
+    -- r2ConnectionPoint::Position, -- the position in this room where the door is located (from bottom left)
+    -- aligmentPreference::Alignment
+    roomOffset:: Vector2
 } deriving (Show, Generic)
 
 data Grid = Grid {
@@ -117,7 +119,8 @@ data Grid = Grid {
 
 data Tile = Tile {
     tileType:: TileType,
-    entities:: [Entity]
+    entities:: [Entity],
+    tileRoomId::ObjectId
 } deriving (Show, Generic)
 
 
@@ -150,6 +153,7 @@ data GeneratedLevel = GeneratedLevel {
   gl_grid:: Grid
 } deriving (Show, Generic)
 
+
 -- ======================================= HELPER FUNCTIONS ===========================================
 getMax::(Ord a)=>[a]->a
 getMax [x] = x
@@ -168,17 +172,23 @@ toFloat::Int->Float
 toFloat x = fromIntegral x :: Float
 
 
-
-
 -- ================================== Grid generation ==================================
-generateTiles::Int->Int->[[Tile]]
-generateTiles _ 0 = [[]]
-generateTiles width height = if(height == 1) then [generateTilesRow width] else
-    generateTilesRow width : generateTiles width (height-1)
+
+createRoom::Int->Int->Int->Room
+createRoom objId width height = Room nwObjId nwGrid
+  where {
+    nwGrid = Grid (generateTiles nwObjId width height);
+    nwObjId = (ObjectId objId)
+}
+
+generateTiles::ObjectId->Int->Int->[[Tile]]
+generateTiles _ _ 0 = [[]]
+generateTiles _roomId width height = if(height == 1) then [generateTilesRow width] else
+    generateTilesRow width : generateTiles _roomId width (height-1)
     where {
         generateTilesRow::Int->[Tile];
         generateTilesRow 0 = [];
-        generateTilesRow x = (createTile Open []): generateTilesRow (x-1)
+        generateTilesRow x = (createTile _roomId Open []): generateTilesRow (x-1)
     }
 
 combineGrids::Grid->Grid->Vector2->Grid -- TODO
@@ -187,10 +197,14 @@ combineGrids r@(Grid {tiles=tilesG1}) grid2 connectionPoint = r {tiles = combine
     combinedTiles = combineTiles tilesG1 (tiles grid2) connectionPoint
 }
 
+-- combineTiles::[[Tile]]->[[Tile]]->Vector2->[[Tile]]
 combineTiles::[[Tile]]->[[Tile]]->Vector2->[[Tile]] --TODO
--- combineTiles tiles1 tiles2 connectionPoint = tiles1 ++ tiles2
 combineTiles tiles1 tiles2 connectionPoint = afterAddingTiles2
   where{
+    --tiles1 = tiles (grid room1);
+    --tiles2 = tiles (grid room2);
+    --room1Id = roomId room1;
+    --room2Id = roomId room2;
     connectionX = fst connectionPoint;
     connectionY = snd connectionPoint;
     w1 = getGridWidth tiles1;
@@ -199,9 +213,12 @@ combineTiles tiles1 tiles2 connectionPoint = afterAddingTiles2
     h2 = getGridHeight tiles2;
     totalWidth = (max w1 w2) + abs connectionX;
     totalHeight = (max h1 h2) + abs connectionY;
-    emptyTiles = generateTiles totalWidth totalHeight;
+    emptyTiles = generateTiles (ObjectId (-1)) totalWidth totalHeight;
     t1StartX = totalWidth - w1 - connectionX;
     t1StartY = totalHeight - h1 - connectionY;
+
+    --tiles1WithRoomId = setTilesRoomId room1Id tiles1;
+    --tiles2WithRoomId = setTilesRoomId room2Id tiles2;
 
     afterAddingTiles1 = addTiles emptyTiles tiles1 (calcStartPosTile1 connectionX , calcStartPosTile1 connectionY);
     afterAddingTiles2 = addTiles afterAddingTiles1 tiles2 (calcStartPosTile2 connectionX , calcStartPosTile2 connectionY);
@@ -221,6 +238,17 @@ addTiles originalTiles nwTiles (startX, startY) = [[progressTile tile (x,y) | (x
       then getTile nwTiles (Position (curX-startX) (curY-startY)) -- tile is in nwTiles
       else getTile originalTiles (Position curX curY) --tile is in originalTiles
   }
+
+
+-- NOT NEEDED?? RoomId is created when creating a Room!
+{-
+setTilesRoomId::ObjectId->[[Tile]]->[[Tile]]
+setTilesRoomId nwRoomId allTiles = [[(setRoomId currentTile) | currentTile <- row] | row <- allTiles]
+  where {
+    setRoomId::Tile->Tile;
+    setRoomId tile = Tile (tileType tile) (entities tile) (tileRoomId tile)
+} -}
+
 
 -- ==================================== GET GRID DATA ======================================
 getTile::[[Tile]]->Position->Tile -- idea: make faster(?) by using 2x concate and then calc the index with divide/modulo
@@ -275,8 +303,8 @@ isPositionInGrid grid pos = True
 -}
 
 -- ============================ Smart constructors =========================================
-createTile::TileType->[Entity]->Tile
-createTile tileType entitiesTile = Tile tileType entitiesTile
+createTile::ObjectId->TileType->[Entity]->Tile
+createTile _roomId tileType entitiesTile = Tile tileType entitiesTile _roomId
 
 
 

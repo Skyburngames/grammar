@@ -2,19 +2,21 @@ module RoomConnectionGenerator
 (
   connectRoomHorizontal,
   connectRoomVertical,
-  createDoorsLevel
+  -- createDoorsLevel
 ) where
 
 import Grammar
 import TileModifiers
 
 connectRoomHorizontal::Room->Room->RoomConnector --places room2 on the right of room1
-connectRoomHorizontal room1 room2 = RoomConnector (roomId room1) (roomId room2) (Position 4 2) (Position 0 2) Horizontal
+--connectRoomHorizontal room1 room2 = RoomConnector (roomId room1) (roomId room2) (Position 4 2) (Position 0 2) Horizontal
+connectRoomHorizontal room1 room2 = RoomConnector (roomId room1) (roomId room2) (5,0)
 
 connectRoomVertical::Room->Room->RoomConnector -- places room2 below room1
-connectRoomVertical room1 room2 = RoomConnector (roomId room1) (roomId room2) (Position 2 0) (Position 2 4) Vertical
+--connectRoomVertical room1 room2 = RoomConnector (roomId room1) (roomId room2) (Position 2 0) (Position 2 4) Vertical
+connectRoomVertical room1 room2 = RoomConnector (roomId room1) (roomId room2) (0,5)
 
-
+{-
 createDoorsLevel::Level->Level
 createDoorsLevel level = Level (name level) (nwRooms (rooms level)) _roomConnections
   where{
@@ -23,6 +25,7 @@ createDoorsLevel level = Level (name level) (nwRooms (rooms level)) _roomConnect
     nwRooms rooms = [createDoorsRoom r _roomConnections|r<- rooms]
 }
 -- ======================================== PRIVATE ==============================================
+
 createDoorsRoom::Room->[RoomConnector]->Room
 createDoorsRoom room roomConnections = Room (roomId room) (nwGrid (grid room))
   where{
@@ -30,7 +33,6 @@ createDoorsRoom room roomConnections = Room (roomId room) (nwGrid (grid room))
     nwGrid _grid = Grid tilesAfterDoorsR1
     where{
       tilesAfterDoorsR1 = (createDoors (tiles _grid) (getDoorPositions room roomConnections));
-      -- tilesAfterDoorsR2 = (createDoors tilesAfterDoorsR1 (getRoomConnectionsRoom room roomConnections))
   }
 }
 
@@ -60,34 +62,4 @@ isPositionInList pos [] = False
 isPositionInList pos (cur_pos:otherPos) =
   if((isPosition pos cur_pos)) then True
     else isPositionInList pos otherPos
-
-
-    {-
-    createDoors2::[[Tile]]->[RoomConnector]->[[Tile]]
-    createDoors2 tiles roomConnections = nwTiles
-      where{
-        nwTiles = [[progressTile tile (Position x y) | (x, tile) <- zip[0..] row] | (y, row) <- zip[0..] tiles];
-        progressTile tile pos = if(isPositionDoor pos roomConnections)
-          then (setTileType Open tile)
-          else tile;
-    }
-    -}
-
-
-
-{-
-isPositionDoor::Position->[RoomConnector]->Bool
-isPositionDoor pos [] = False
-isPositionDoor pos (rc:roomConnectors) =
-  if((isPosition pos (r1ConnectionPoint rc)) || (isPosition pos (r2ConnectionPoint rc))) then True
-    else isPositionDoor pos roomConnectors -}
-
-{-
-getRoomConnectionsRoom2::ObjectId->[RoomConnector]->[RoomConnector]
-getRoomConnectionsRoom2 roomId roomConnections = [rc|rc<-roomConnections, objectIdInRoomConnector rc roomId]
-  where{
-    objectIdInRoomConnector::RoomConnector->ObjectId->Bool;
-    objectIdInRoomConnector roomConnector _objectId =
-      ((objectId _objectId) == (objectId (room1 roomConnector))) || ((objectId _objectId) == (objectId (room2 roomConnector)))
-}
 -}

@@ -29,7 +29,7 @@ instance ToJSON TileType
 instance ToJSON Entity
 instance ToJSON EntityType
 instance ToJSON ObjectId
-instance ToJSON Alignment
+-- instance ToJSON Alignment
 instance ToJSON Position
 instance ToJSON RoomConnector
 
@@ -51,6 +51,7 @@ data GeneratedLevel = GeneratedLevel {
     name:: String,
     grid:: JSONParser.Grid
 } deriving (Show, Generic)
+
 
 {-
 data Room = Room {
@@ -76,7 +77,8 @@ data Grid = Grid {
 data Tile = Tile {
     tileGridPosition:: GridPositionJSON,
     tileType:: TileType,
-    entities:: [Entity]
+    entities:: [Entity],
+    tileRoomId::ObjectId
 } deriving (Show, Generic)
 
 
@@ -112,7 +114,7 @@ convert2DTiles [] = []
 convert2DTiles rows = [(convertTile tile x y) | (y,row) <- zip[0..] rows, (x,tile) <- zip[0..] row]
 
 convertTile::Grammar.Tile->Int->Int->JSONParser.Tile
-convertTile tile posX posY = JSONParser.Tile (GridPositionJSON posX posY) (Grammar.tileType tile) (Grammar.entities tile)
+convertTile tile posX posY = JSONParser.Tile (GridPositionJSON posX posY) (Grammar.tileType tile) (Grammar.entities tile) (Grammar.tileRoomId tile)
 
 
 -- ============================= Generate product.json =============================

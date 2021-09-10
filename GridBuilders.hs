@@ -1,6 +1,6 @@
 module GridBuilders
 (
-  runMultipleGridBuilders,
+  runGridBuildersOnRoom,
   gb_allTiles,
   gb_randomTile,
 ) where
@@ -12,6 +12,12 @@ import RandomUtils
 
 
 -- ======================================== GRIDBUILDERS ==========================================
+runGridBuildersOnRoom::Room->StdGen->[(GridBuilderData->Grid)]->Room
+runGridBuildersOnRoom startRoom stdGen functions = Room (roomId startRoom) nwGrid
+  where {
+    nwGrid = runMultipleGridBuilders ((grid startRoom),stdGen) functions
+}
+
 runMultipleGridBuilders::GridBuilderData->[(GridBuilderData->Grid)]->Grid
 runMultipleGridBuilders (startGrid,_) [] = startGrid
 runMultipleGridBuilders (startGrid,startGen) (f:fs) = runMultipleGridBuilders (nwGrid, nextGen) fs

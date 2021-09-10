@@ -5,7 +5,7 @@
 module TileModifiers
 (
     setTileType,
-    addEntity
+    addEntity,
 ) where
 
 import Grammar
