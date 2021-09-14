@@ -49,7 +49,13 @@ module Grammar
     toInt,
     toFloat,
     combineGrids,
+    combineTiles,
     createRoom,
+    compareObjectId,
+    reverseVector2,
+    getGridSize,
+    positionToVector,
+    findRoom
 ) where
 
 -- ============================= IMPORTS =============================
@@ -171,7 +177,14 @@ toInt x = round x
 toFloat::Int->Float
 toFloat x = fromIntegral x :: Float
 
+compareObjectId::ObjectId->ObjectId->Bool
+compareObjectId obj1 obj2 = (objectId obj1) == (objectId obj2)
 
+reverseVector2::Vector2->Vector2
+reverseVector2 (x,y) = ((-1) * x, (-1) * y)
+
+positionToVector::Position->Vector2
+positionToVector pos = (x pos, y pos)
 -- ================================== Grid generation ==================================
 
 createRoom::Int->Int->Int->Room
@@ -191,14 +204,14 @@ generateTiles _roomId width height = if(height == 1) then [generateTilesRow widt
         generateTilesRow x = (createTile _roomId Open []): generateTilesRow (x-1)
     }
 
-combineGrids::Grid->Grid->Vector2->Grid -- TODO
+combineGrids::Grid->Grid->Vector2->Grid
 combineGrids r@(Grid {tiles=tilesG1}) grid2 connectionPoint = r {tiles = combinedTiles}
   where {
     combinedTiles = combineTiles tilesG1 (tiles grid2) connectionPoint
 }
 
 -- combineTiles::[[Tile]]->[[Tile]]->Vector2->[[Tile]]
-combineTiles::[[Tile]]->[[Tile]]->Vector2->[[Tile]] --TODO
+combineTiles::[[Tile]]->[[Tile]]->Vector2->[[Tile]]
 combineTiles tiles1 tiles2 connectionPoint = afterAddingTiles2
   where{
     --tiles1 = tiles (grid room1);
@@ -280,6 +293,9 @@ getGridWidth tiles = length (head tiles)
 getGridHeight::[[Tile]]->Int
 getGridHeight tiles = length tiles
 
+
+getGridSize::[[Tile]]->Vector2
+getGridSize tiles = (getGridWidth tiles, getGridHeight tiles)
 {-
 getGridWidth::[Grid]->Int
 getGridWidth grid = length (head (tiles grid))
@@ -301,6 +317,14 @@ isPosition pos1 pos2 = if ((x pos1) == (x pos2) && (y pos1) == (y pos2)) then Tr
 isPositionInGrid::Grid->Position->Bool
 isPositionInGrid grid pos = True
 -}
+
+findRoom::[Room]->ObjectId->Maybe Room
+findRoom allRooms currentRoomId = result
+  where{
+    result = if((length allRoomsFound) > 0) then Just (allRoomsFound!!0) else Nothing;
+    allRoomsFound = [r | r <- allRooms, compareObjectId (roomId r) currentRoomId]
+}
+
 
 -- ============================ Smart constructors =========================================
 createTile::ObjectId->TileType->[Entity]->Tile
