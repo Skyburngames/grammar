@@ -20,15 +20,19 @@ import System.Random
 main :: IO ()
 main = do
     -- ========================== GENERATE A PRODUCT ====================================---
-    -- generateJSON game1 "C:/Users/kevin/PG_Game/Assets" -- AW-PW
-    generateJSON game1 "C:/Users/Kevin/Projecten/UnityProjecten/PG_Game/Assets" -- Laptop
+    generateJSON game1 "C:/Users/kevin/PG_Game/Assets" -- AW-PW
+    --generateJSON game1 "C:/Users/Kevin/Projecten/UnityProjecten/PG_Game/Assets" -- Laptop
     -- print(toFloat 20)
     --print(test (con_isTileType Solid) 0.25 Highest ((grid3, mkStdGen 54566), testPos1, (getTile grid3 testPos1), mkStdGen 123))
-    print r1Connected
-    print r2Connected
-    print r3Connected
-    print r4Connected
+    -- print afterAddingRoom2TEST
+    -- print tilesR2
+    -- print testPrint1
 -- ====================================== GENERATE DATASTRUCTURE =================================================
+------------------------------------------ TEST SUITE ------------------------------------------
+
+------------------------------------------------------------------------------------------
+
+
 {-
 startGrid = Grid (generateTiles 5 5)
 startGen = mkStdGen 902727
@@ -106,24 +110,48 @@ generatedRoom1 = runGridBuildersOnRoom startRoom1 startGen [
   gb_randomTile (1,1) (1,1) (tb_editTile ((addEntity (Entity (ObjectId 1) Player)).(setTileType Open)))
   ]
 
-generatedRoom2 = startRoom2
-generatedRoom3 = startRoom3
-generatedRoom4 = startRoom4
+generatedRoom2 = runGridBuildersOnRoom startRoom2 startGen [
+    gb_allTiles (con_always True) (tb_editTile (setTileType Solid)),
+    gb_randomTile (1,1) (2,2) (tb_editTile (setTileType Open)),
+    gb_randomTile (3,3) (2,2) (tb_editTile (setTileType Open))
+  ]
+generatedRoom3 = runGridBuildersOnRoom startRoom3 startGen [
+    gb_allTiles (con_always True) (tb_editTile (setTileType Solid)),
+    gb_randomTile (1,1) (1,1) (tb_editTile (setTileType Open)),
+    gb_randomTile (3,3) (1,1) (tb_editTile (setTileType Open)),
+    gb_randomTile (2,2) (3,3) (tb_editTile (setTileType Open))
+  ]
+generatedRoom4 = runGridBuildersOnRoom startRoom4 startGen [
+    gb_allTiles (con_always True) (tb_editTile (setTileType Solid)),
+    gb_randomTile (1,1) (1,1) (tb_editTile (setTileType Open)),
+    gb_randomTile (3,3) (1,1) (tb_editTile (setTileType Open)),
+    gb_randomTile (1,1) (3,3) (tb_editTile (setTileType Open)),
+    gb_randomTile (3,3) (3,3) (tb_editTile (setTileType Open))
+  ]
 
 
 
 
-connectR1withR2 = connectRoomHorizontal generatedRoom1 generatedRoom2
-connectR2withR3 = connectRoomHorizontal generatedRoom2 generatedRoom3
-connectR2withR4 = connectRoomVertical generatedRoom2 generatedRoom4
-
-r1Connected = getConnectedRoomIds level1WithoutDoors (roomId generatedRoom1)
-r2Connected = getConnectedRoomIds level1WithoutDoors (roomId generatedRoom2)
-r3Connected = getConnectedRoomIds level1WithoutDoors (roomId generatedRoom3)
-r4Connected = getConnectedRoomIds level1WithoutDoors (roomId generatedRoom4)
+conA = connectRoomHorizontal generatedRoom1 generatedRoom2
+conB = connectRoomHorizontal generatedRoom2 generatedRoom3
+conC = connectRoomVertical generatedRoom2 generatedRoom4
+-- conD = connectRoomVertical generatedRoom3 generatedRoom4
 
 -- Create the level that is exported
-level1WithoutDoors = Level "level1" [generatedRoom1, generatedRoom2, generatedRoom3, generatedRoom4] [connectR1withR2, connectR2withR3, connectR2withR4]
--- level1WithDoors = createDoorsLevel level1WithoutDoors
-generatedLevel1 = progressLevel level1WithoutDoors
+fullyConnectedLevel = Level "level1" [generatedRoom1, generatedRoom2, generatedRoom3, generatedRoom4] [conA, conB, conC]
+testConnectedLevel = Level "level2" [generatedRoom1, generatedRoom2] [conA]
+
+
+
+
+generatedLevel1 = progressLevel fullyConnectedLevel
+
+-- ------- TEST -----------
+-- grid1 = tiles (gl_grid generatedLevel1)
+-- grid2 = combineTiles grid1 (tiles (grid generatedRoom3)) (-5,0)
+-- resultGL = addGridToGeneratedLevel generatedLevel1 generatedRoom3 (roomId generatedRoom2) ((-5),0)
+-- testPrint1 = addGridToGeneratedLevel generatedLevel1 generatedRoom3 (roomId generatedRoom2) ((-5),0)
+-- resultGL = GeneratedLevel "level3" (Grid grid2)
+-- ------- ------ -----------
+
 game1 = Game [generatedLevel1] TopDown

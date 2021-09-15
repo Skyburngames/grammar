@@ -224,8 +224,8 @@ combineTiles tiles1 tiles2 connectionPoint = afterAddingTiles2
     h1 = getGridHeight tiles1;
     w2 = getGridWidth tiles2;
     h2 = getGridHeight tiles2;
-    totalWidth = (max w1 w2) + abs connectionX;
-    totalHeight = (max h1 h2) + abs connectionY;
+    totalWidth = if(connectionX >= 0) then (max (connectionX + w2) w1) else (abs connectionX) + w1; --(max w1 w2) + abs connectionX;
+    totalHeight = if(connectionY >= 0) then (max (connectionY + h2) h1) else (abs connectionY) + h1; --(max h1 h2) + abs connectionY;
     emptyTiles = generateTiles (ObjectId (-1)) totalWidth totalHeight;
     t1StartX = totalWidth - w1 - connectionX;
     t1StartY = totalHeight - h1 - connectionY;
