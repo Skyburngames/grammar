@@ -2,11 +2,14 @@ module RoomConnectionGenerator
 (
   connectRoomHorizontal,
   connectRoomVertical,
+  openCriticalPath
   -- createDoorsLevel
 ) where
 
 import Grammar
 import TileModifiers
+
+
 
 connectRoomHorizontal::Room->Room->RoomConnector --places room2 on the right of room1
 --connectRoomHorizontal room1 room2 = RoomConnector (roomId room1) (roomId room2) (Position 4 2) (Position 0 2) Horizontal
@@ -16,6 +19,34 @@ connectRoomVertical::Room->Room->RoomConnector -- places room2 below room1
 --connectRoomVertical room1 room2 = RoomConnector (roomId room1) (roomId room2) (Position 2 0) (Position 2 4) Vertical
 connectRoomVertical room1 room2 = RoomConnector (roomId room1) (roomId room2) (0,5)
 
+-- PATHFINDING --
+
+openCriticalPath::[[Tile]]->Position->Position->[[Tile]]
+openCriticalPath tiles startPos endPos = tiles
+
+
+
+-- PRIVATE
+-- getCriticalPositions::
+
+getDistancesFromEndPosition::[[Tile]]->Position->Position->[[(Tile, Position, Int)]]
+getDistancesFromEndPosition tiles startPos endPos = [[]]
+
+getShortestPath::[[(Tile, Position, Int)]]->[Position]
+getShortestPath tilesWithDistanceData = []
+
+gb_editTilesOnPath::[[Tile]]->[Position]->TileModifier->[[Tile]]
+gb_editTilesOnPath tiles path tileModFunc = tiles
+
+
+
+
+
+
+
+
+
+-- ========================================================== OLD ===================================================================
 {-
 createDoorsLevel::Level->Level
 createDoorsLevel level = Level (name level) (nwRooms (rooms level)) _roomConnections

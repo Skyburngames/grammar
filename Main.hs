@@ -20,8 +20,8 @@ import System.Random
 main :: IO ()
 main = do
     -- ========================== GENERATE A PRODUCT ====================================---
-    generateJSON game1 "C:/Users/kevin/PG_Game/Assets" -- AW-PW
-    --generateJSON game1 "C:/Users/Kevin/Projecten/UnityProjecten/PG_Game/Assets" -- Laptop
+    --generateJSON game1 "C:/Users/kevin/PG_Game/Assets" -- AW-PW
+    generateJSON game1 "C:/Users/Kevin/Projecten/UnityProjecten/PG_Game/Assets" -- Laptop
     -- print(toFloat 20)
     --print(test (con_isTileType Solid) 0.25 Highest ((grid3, mkStdGen 54566), testPos1, (getTile grid3 testPos1), mkStdGen 123))
     -- print afterAddingRoom2TEST
