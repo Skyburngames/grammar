@@ -139,7 +139,7 @@ data Entity =
     } deriving (Show, Generic)
 
 
-data EntityType = Enemy| Powerup | Player deriving (Show, Generic)
+data EntityType = Enemy| Powerup | Player| Finish deriving (Show, Generic)
 
 
 -- IDS

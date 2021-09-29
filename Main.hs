@@ -20,8 +20,9 @@ import System.Random
 main :: IO ()
 main = do
     -- ========================== GENERATE A PRODUCT ====================================---
-    --generateJSON game1 "C:/Users/kevin/PG_Game/Assets" -- AW-PW
-    generateJSON game1 "C:/Users/Kevin/Projecten/UnityProjecten/PG_Game/Assets" -- Laptop
+    generateJSON game1 "C:/Users/kevin/PG_Game/Assets" -- AW-PW
+    print (getDoorPositionsInRoom (roomConnections level3) generatedRoom1)
+    -- generateJSON game1 "C:/Users/Kevin/Projecten/UnityProjecten/PG_Game/Assets" -- Laptop
     -- print(toFloat 20)
     --print(test (con_isTileType Solid) 0.25 Highest ((grid3, mkStdGen 54566), testPos1, (getTile grid3 testPos1), mkStdGen 123))
     -- print afterAddingRoom2TEST
@@ -104,10 +105,12 @@ startRoom3 = createRoom 3 5 5
 startRoom4 = createRoom 4 5 5
 
 generatedRoom1 = runGridBuildersOnRoom startRoom1 startGen [
-  gb_randomTile (2,2) (2,2) (tb_editTile (setTileType Solid)),
-  gb_allTiles (con_neighbourTileCondition (con_isTileType Solid) 0.6 Cumulative) (tb_editTile (setTileType Solid)),
-  gb_allTiles (con_gridBorder) (tb_editTile (setTileType Solid)),
-  gb_randomTile (1,1) (1,1) (tb_editTile ((addEntity (Entity (ObjectId 1) Player)).(setTileType Open)))
+  --gb_randomTile (2,2) (2,2) (tb_editTile (setTileType Solid)),
+  --gb_allTiles (con_neighbourTileCondition (con_isTileType Solid) 0.6 Cumulative) (tb_editTile (setTileType Solid)),
+  --gb_allTiles (con_gridBorder) (tb_editTile (setTileType Solid)),
+  gb_allTiles (con_always True) (tb_editTile (setTileType Solid)),
+  gb_randomTile (2,2) (1,1) (tb_editTile ((addEntity (Entity (ObjectId 1) Player)).(setTileType Open)))
+  -- gb_randomTile (3,3) (3,3) (tb_editTile ((addEntity (Entity (ObjectId 1) Finish)).(setTileType Open)))
   ]
 
 generatedRoom2 = runGridBuildersOnRoom startRoom2 startGen [
@@ -126,7 +129,8 @@ generatedRoom4 = runGridBuildersOnRoom startRoom4 startGen [
     gb_randomTile (1,1) (1,1) (tb_editTile (setTileType Open)),
     gb_randomTile (3,3) (1,1) (tb_editTile (setTileType Open)),
     gb_randomTile (1,1) (3,3) (tb_editTile (setTileType Open)),
-    gb_randomTile (3,3) (3,3) (tb_editTile (setTileType Open))
+    gb_randomTile (3,3) (3,3) (tb_editTile (setTileType Open)),
+    gb_randomTile (2,2) (2,2) (tb_editTile ((addEntity (Entity (ObjectId 1) Finish)).(setTileType Open)))
   ]
 
 
@@ -135,16 +139,20 @@ generatedRoom4 = runGridBuildersOnRoom startRoom4 startGen [
 conA = connectRoomHorizontal generatedRoom1 generatedRoom2
 conB = connectRoomHorizontal generatedRoom2 generatedRoom3
 conC = connectRoomVertical generatedRoom2 generatedRoom4
+conD = connectRoomHorizontal generatedRoom1 generatedRoom4
 -- conD = connectRoomVertical generatedRoom3 generatedRoom4
 
+-- TEST 4 ROOMS
 -- Create the level that is exported
-fullyConnectedLevel = Level "level1" [generatedRoom1, generatedRoom2, generatedRoom3, generatedRoom4] [conA, conB, conC]
-testConnectedLevel = Level "level2" [generatedRoom1, generatedRoom2] [conA]
+level1 = Level "level1" [generatedRoom1, generatedRoom2, generatedRoom3, generatedRoom4] [conA, conB, conC]
+level2 = Level "level2" [generatedRoom1, generatedRoom2] [conD]
+level3 = Level "level3" [generatedRoom1] [conA]
 
 
 
 
-generatedLevel1 = progressLevel fullyConnectedLevel
+levelWithDoors = openCriticalPathLevel level3
+generatedLevel1 = progressLevel levelWithDoors
 
 -- ------- TEST -----------
 -- grid1 = tiles (gl_grid generatedLevel1)
