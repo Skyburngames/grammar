@@ -48,6 +48,7 @@ module Grammar
     clamp01,
     toInt,
     toFloat,
+    divideIntCeil,
     combineGrids,
     combineTiles,
     createRoom,
@@ -185,6 +186,10 @@ reverseVector2 (x,y) = ((-1) * x, (-1) * y)
 
 positionToVector::Position->Vector2
 positionToVector pos = (x pos, y pos)
+
+
+divideIntCeil::Int->Int->Int
+divideIntCeil value divider = ceiling ((toFloat value) / (toFloat divider))
 -- ================================== Grid generation ==================================
 
 createRoom::Int->Int->Int->Room

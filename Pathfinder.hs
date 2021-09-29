@@ -7,7 +7,7 @@ module Pathfinder
 import Grammar
 
 
-
+-- use this function to edit tiles on a path
 gb_editTilesOnPath::[[Tile]]->[Position]->TileModifier->[[Tile]]
 gb_editTilesOnPath tiles [] tileModFunc = tiles
 gb_editTilesOnPath tiles (currentPathPos:otherPathPos) tileModFunc = gb_editTilesOnPath nwTiles otherPathPos tileModFunc
@@ -18,18 +18,15 @@ gb_editTilesOnPath tiles (currentPathPos:otherPathPos) tileModFunc = gb_editTile
   }
 
 
-
+-- this function returns the shortest path between start and end (NOTE: hemelsbreed > does not use pathfinding)
 getShortestPath::[[Tile]]->Position->Position->[Position]
-getShortestPath tiles startPos endPos = createPath [] startPos --uses getDistancesFromEndPosition and getShortestPathFromDistanceData
+getShortestPath tiles startPos endPos = createPath [startPos] startPos
   where{
     endPosX = (x endPos);
     endPosY = (y endPos);
-    createPath::[Position]->Position->[Position];
+    createPath::[Position]->Position->[Position]; --keep adding something to the path until currentPos is endPos
     createPath currentPath currentPos = if(isPosition currentPos endPos) then currentPath else
       createPath (nwCurrentPos:currentPath) nwCurrentPos
-
-      --if(not(deltaX == 0))then moveOnX else
-      --if(not(deltaY == 0)) then moveOnY else
     where {
       deltaX = endPosX - currentPosX;
       deltaY = endPosY - currentPosY;
@@ -42,13 +39,3 @@ getShortestPath tiles startPos endPos = createPath [] startPos --uses getDistanc
   }
 
 }
-
-
--- ================================= PRIVATE =========================================
-{-
-getDistancesFromEndPosition::[[Tile]]->Position->Position->[[(Tile, Position, Int)]]
-getDistancesFromEndPosition tiles startPos endPos = [[]]
-
-getShortestPathFromDistanceData::[[(Tile, Position, Int)]]->[Position]
-getShortestPathFromDistanceData tilesWithDistanceData = []
--}

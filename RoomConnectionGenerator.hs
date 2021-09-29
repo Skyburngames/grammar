@@ -43,29 +43,22 @@ openCriticalPathRoom roomConnectors room = Room (roomId room) (Grid nwTiles) --T
     criticalPositions = getCriticalPositionsInRoom roomConnectors room; --find all the criticalPositions in this room
     nwTiles = openCriticalPathsBetweenManyToManyPositions (tiles (grid room)) criticalPositions; --open paths so all the criticalPositions are connected
 
-    openCriticalPathsBetweenManyToManyPositions::[[Tile]]->[Position]->[[Tile]]; --open a path between the each of the criticalPositions
+    openCriticalPathsBetweenManyToManyPositions::[[Tile]]->[Position]->[[Tile]]; --open a path between each of the criticalPositions
     openCriticalPathsBetweenManyToManyPositions startTiles [] = startTiles;
     openCriticalPathsBetweenManyToManyPositions startTiles (currentCritPos:otherCritPos) = openCriticalPathsBetweenManyToManyPositions (openCriticalPathsBetweenOneToManyPositions startTiles currentCritPos otherCritPos) otherCritPos
       where {
-        openCriticalPathsBetweenOneToManyPositions::[[Tile]]->Position->[Position]->[[Tile]];
-        openCriticalPathsBetweenOneToManyPositions _startTiles startPos [] = _startTiles;
+        openCriticalPathsBetweenOneToManyPositions::[[Tile]]->Position->[Position]->[[Tile]]; -- open a path between the currentPosition and each of the destination positions
+        openCriticalPathsBetweenOneToManyPositions _startTiles startPos [] = gb_editTilesOnPath _startTiles [startPos] (setTileType Open); --even if the startPos has no end position (f.e. a empty room) still make a path with just the startPos (this clears tile on the door location) --_startTiles;
         openCriticalPathsBetweenOneToManyPositions _startTiles startPos (currentDestPos: otherDestPositions) =
           openCriticalPathsBetweenOneToManyPositions openCriticalPathFunc startPos otherDestPositions
           where {
-            shortestPath = getShortestPath _startTiles startPos currentDestPos;
-            openCriticalPathFunc = gb_editTilesOnPath _startTiles shortestPath (setTileType Open)
+            shortestPath = getShortestPath _startTiles startPos currentDestPos; -- find the shortestPath
+            openCriticalPathFunc = gb_editTilesOnPath _startTiles shortestPath (setTileType Open) -- set the tileTypes to open on all the tiles on the path
           }
 
     }
 }
 
-
---openCriticalPathTiles::[[Tile]]->Position->Position->[[Tile]] -- TODO: Continue here!
---openCriticalPathTiles tiles startPos endPos = tiles --TODO: open a path between startpos and endpos
-
-
-
--- getCriticalPositions::
 
 getCriticalPositionsInRoom::[RoomConnector]->Room->[Position] --returns a list with all the CriticalPositions in a room (either the player, levelEnd or doors)
 getCriticalPositionsInRoom roomConnectors room = otherCriticalPositions++doorPositions
@@ -75,7 +68,9 @@ getCriticalPositionsInRoom roomConnectors room = otherCriticalPositions++doorPos
     doorPositions = getDoorPositionsInRoom roomConnectors room;
 }
 
-getDoorPositionsInRoom::[RoomConnector]->Room->[Position] --NOTE: for now all doors are in the middle
+
+-- return a list with all the doorPositions in a room (based on the roomConnectors)
+getDoorPositionsInRoom::[RoomConnector]->Room->[Position] --NOTE: doors are placed in the middle of the room
 --getDoorPositionsInRoom [] room = []
 getDoorPositionsInRoom roomConnectors room = [getDoorPosition room rc |rc<-(getRoomConnectorsFromRoomPerspective room roomConnectors), isRoomRelevant (room1 rc)]
   where{
@@ -83,8 +78,8 @@ getDoorPositionsInRoom roomConnectors room = [getDoorPosition room rc |rc<-(getR
     -- getDoorPosition _room _rc = Position (if(offsetX == 0) then 0 else calcPositionX) (if(offsetY == 0) then 0 else calcPositionY)
     getDoorPosition _room _rc = Position calcPositionX calcPositionY --TODO: GOES WRONG!!!
       where {
-        calcPositionX = if(offsetX > 0) then (gridWith-1) else 0;
-        calcPositionY = if(offsetY > 0) then 0 else (gridHeight-1);
+        calcPositionX = if(offsetX == 0) then (divideIntCeil gridWith 2)-1 else (if(offsetX > 0) then (gridWith-1) else 0);
+        calcPositionY = if(offsetY == 0) then (divideIntCeil gridHeight 2)-1 else (if(offsetY > 0) then (gridHeight-1) else 0); --if(offsetY > 0) then 0 else (gridHeight-1);
         offsetX = (fst(roomOffset _rc));
         offsetY = (snd(roomOffset _rc));
         gridWith = getGridWidth (tiles (grid _room));
@@ -93,6 +88,7 @@ getDoorPositionsInRoom roomConnectors room = [getDoorPosition room rc |rc<-(getR
 
     isRoomRelevant::ObjectId->Bool;
     isRoomRelevant rId = compareObjectId rId ((roomId) room);
+    -- test1 = [Position (fst(roomOffset rc)) (snd(roomOffset rc))|rc<-(getRoomConnectorsFromRoomPerspective room roomConnectors)];
     getRoomConnectorsFromRoomPerspective::Room->[RoomConnector]->[RoomConnector];
     getRoomConnectorsFromRoomPerspective currentRoom [] = [];
     getRoomConnectorsFromRoomPerspective currentRoom (curRC:otherRCs) = (progressCurRC):(getRoomConnectorsFromRoomPerspective currentRoom otherRCs)
@@ -102,7 +98,7 @@ getDoorPositionsInRoom roomConnectors room = [getDoorPosition room rc |rc<-(getR
 }
 
 
-
+-- checks if a list with entities somewhere contains a element that is marked as a criticalPoint
 doEntitiesContainCriticalPoint::[Entity]->Bool
 doEntitiesContainCriticalPoint [] = False
 doEntitiesContainCriticalPoint (currentEntity:otherEntities) = if(isEntityTypeCritical (entityType currentEntity)) then True else doEntitiesContainCriticalPoint otherEntities
