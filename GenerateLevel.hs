@@ -30,8 +30,6 @@ generateLevel gLevel level (roomTodo: otherRoomsTodo) =
     else generateLevel nwGeneratedLevel level nwRoomsTodoRemaining
   where {
     nwGeneratedLevel = generateRoomInGeneratedLevel gLevel roomTodo (roomConnections level); -- generate the room
-    -- nwGeneratedLevel = generateAllConnectedRooms gLevel roomTodo (roomConnections level);
-    -- nwRoomsTodoRemaining = connectedRoomsNotYetMade ++ otherRoomsTodo; --
     nwRoomsTodoRemaining = [ r|r<-allTodoRooms, not (doesRoomExcist nwGeneratedLevel (roomId r))]; -- filter on rooms that arent made yet
     allTodoRooms = connectedRooms++otherRoomsTodo; --combine the connected rooms with the rooms that where already todo
     connectedRooms = (getConnectedRooms level (roomId roomTodo)); -- all rooms connected to roomTodo
@@ -56,7 +54,6 @@ getConnectedRoomIds level cur_roomId = result
     allRooms = (getConnectedRooms level cur_roomId);
     result = [(roomId r) |r <- allRooms]
   }
-
 
 
 generateRoomInGeneratedLevel::GeneratedLevel->Room->[RoomConnector]->GeneratedLevel --make this room but make sure it is located on the valid position based on roomConnectors and the current generatedLevel
