@@ -32,28 +32,39 @@ connectRoomVertical room1 room2 = RoomConnector (roomId room1) (roomId room2) (0
 openCriticalPathLevel::Level->Level
 openCriticalPathLevel level = nwLevel --openCriticalPathRoom on each Room
   where{
-    nwLevel = Level (name level) (map (openCriticalPathRoom (roomConnections level)) (rooms level)) (roomConnections level);
+    nwLevel = Level (name level) (map (openCriticalPathRoom (roomConnections level)) (rooms level))
+    (roomConnections level);
 }
 
-
--- PRIVATE
 openCriticalPathRoom::[RoomConnector]->Room->Room
-openCriticalPathRoom roomConnectors room = Room (roomId room) (Grid nwTiles) --TODO: 1> find all CP in this room, then openCriticalPathTiles from CP-1 to CP-2, CP-1 to CP-3, CP-2 to CP-3 etc
+-- find all CP in this room, then openCriticalPathTiles from CP-1 to CP-2, CP-1 to CP-3, CP-2 to CP-3 etc
+openCriticalPathRoom roomConnectors room = Room (roomId room) (Grid nwTiles)
   where{
-    criticalPositions = getCriticalPositionsInRoom roomConnectors room; --find all the criticalPositions in this room
-    nwTiles = openCriticalPathsBetweenManyToManyPositions (tiles (grid room)) criticalPositions; --open paths so all the criticalPositions are connected
+  --find all the criticalPositions in this room
+    criticalPositions = getCriticalPositionsInRoom roomConnectors room;
+    --open paths so all the criticalPositions are connected
+    nwTiles = openCriticalPathsBetweenManyToManyPositions (tiles (grid room)) criticalPositions;
 
-    openCriticalPathsBetweenManyToManyPositions::[[Tile]]->[Position]->[[Tile]]; --open a path between each of the criticalPositions
+    --open a path between each of the criticalPositions
+    openCriticalPathsBetweenManyToManyPositions::[[Tile]]->[Position]->[[Tile]];
     openCriticalPathsBetweenManyToManyPositions startTiles [] = startTiles;
-    openCriticalPathsBetweenManyToManyPositions startTiles (currentCritPos:otherCritPos) = openCriticalPathsBetweenManyToManyPositions (openCriticalPathsBetweenOneToManyPositions startTiles currentCritPos otherCritPos) otherCritPos
+    openCriticalPathsBetweenManyToManyPositions startTiles (currentCritPos:otherCritPos) =
+      openCriticalPathsBetweenManyToManyPositions (openCriticalPathsBetweenOneToManyPositions
+      startTiles currentCritPos otherCritPos) otherCritPos
       where {
-        openCriticalPathsBetweenOneToManyPositions::[[Tile]]->Position->[Position]->[[Tile]]; -- open a path between the currentPosition and each of the destination positions
-        openCriticalPathsBetweenOneToManyPositions _startTiles startPos [] = gb_editTilesOnPath _startTiles [startPos] (setTileType Open); --even if the startPos has no end position (f.e. a empty room) still make a path with just the startPos (this clears tile on the door location) --_startTiles;
+        -- open a path between the currentPosition and each of the destination positions
+        openCriticalPathsBetweenOneToManyPositions::[[Tile]]->Position->[Position]->[[Tile]];
+        --even if the startPos has no end position (f.e. a empty room) still make a path with just the startPos
+        -- (this clears tile on the door location) --_startTiles;
+        openCriticalPathsBetweenOneToManyPositions _startTiles startPos [] = gb_editTilesOnPath _startTiles
+          [startPos] (setTileType Open);
         openCriticalPathsBetweenOneToManyPositions _startTiles startPos (currentDestPos: otherDestPositions) =
           openCriticalPathsBetweenOneToManyPositions openCriticalPathFunc startPos otherDestPositions
           where {
-            shortestPath = getShortestPath _startTiles startPos currentDestPos; -- find the shortestPath
-            openCriticalPathFunc = gb_editTilesOnPath _startTiles shortestPath (setTileType Open) -- set the tileTypes to open on all the tiles on the path
+            -- find the shortestPath
+            shortestPath = getShortestPath _startTiles startPos currentDestPos;
+            -- set the tileTypes to open on all the tiles on the path
+            openCriticalPathFunc = gb_editTilesOnPath _startTiles shortestPath (setTileType Open)
           }
 
     }

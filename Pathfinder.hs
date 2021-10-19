@@ -18,13 +18,14 @@ gb_editTilesOnPath tiles (currentPathPos:otherPathPos) tileModFunc = gb_editTile
   }
 
 
--- this function returns the shortest path between start and end (NOTE: hemelsbreed > does not use pathfinding)
+-- this function returns the shortest path between start and end
 getShortestPath::[[Tile]]->Position->Position->[Position]
 getShortestPath tiles startPos endPos = createPath [startPos] startPos
   where{
     endPosX = (x endPos);
     endPosY = (y endPos);
-    createPath::[Position]->Position->[Position]; --keep adding something to the path until currentPos is endPos
+     --keep adding something to the path until currentPos is endPos
+    createPath::[Position]->Position->[Position];
     createPath currentPath currentPos = if(isPosition currentPos endPos) then currentPath else
       createPath (nwCurrentPos:currentPath) nwCurrentPos
     where {
@@ -32,10 +33,10 @@ getShortestPath tiles startPos endPos = createPath [startPos] startPos
       deltaY = endPosY - currentPosY;
       currentPosX = (x currentPos);
       currentPosY = (y currentPos);
-      nwCurrentPos = if(not(deltaX == 0))then moveOnX else moveOnY; --only call this if destination is not reached!
+      --only call this if destination is not reached!
+      nwCurrentPos = if(not(deltaX == 0))then moveOnX else moveOnY;
 
       moveOnX = if(deltaX > 0) then Position (currentPosX+1) currentPosY else Position (currentPosX-1) currentPosY;
       moveOnY = if(deltaY > 0) then Position currentPosX (currentPosY+1) else Position currentPosX (currentPosY-1);
   }
-
 }
