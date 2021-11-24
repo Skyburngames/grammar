@@ -4,67 +4,67 @@
 
 module GenerateLevel
 (
-  progressLevel,
+  progressRoomedLevel,
   getConnectedRooms,
   getConnectedRoomIds,
   getOriginWorldPosition,
   getTilesWithWorldPosition,
-  addRoomToGeneratedLevel,
-  addGridToGeneratedLevel,
+  addRoomToLevel,
+  addGridToLevel,
   doesRoomExcist,
 ) where
 
 import Grammar
 
 
-progressLevel::Level->GeneratedLevel
-progressLevel level = generateLevel emptyGeneratedLevel level (rooms level)
+progressRoomedLevel::RoomedLevel->Level
+progressRoomedLevel roomedLevel = generateLevel emptyGeneratedLevel roomedLevel (rooms roomedLevel)
   where {
-    emptyGeneratedLevel = GeneratedLevel (name level) (Grid [])
+    emptyGeneratedLevel = Level (name roomedLevel) (Grid [])
 }
 
-generateLevel::GeneratedLevel->Level->[Room]->GeneratedLevel
+generateLevel::Level->RoomedLevel->[Room]->Level
 generateLevel gLevel _ [] = gLevel
-generateLevel gLevel level (roomTodo: otherRoomsTodo) =
-  if(doesRoomExcist gLevel (roomId roomTodo)) then generateLevel gLevel level nwRoomsTodoRemaining
-    else generateLevel nwGeneratedLevel level nwRoomsTodoRemaining
+generateLevel gLevel roomedLevel (roomTodo: otherRoomsTodo) =
+  if(doesRoomExcist gLevel (roomId roomTodo)) then generateLevel gLevel roomedLevel nwRoomsTodoRemaining
+    else generateLevel nwGeneratedLevel roomedLevel nwRoomsTodoRemaining
   where {
-    nwGeneratedLevel = generateRoomInGeneratedLevel gLevel roomTodo (roomConnections level); -- generate the room
+    nwGeneratedLevel = generateRoomInLevel gLevel roomTodo (roomConnections roomedLevel); -- generate the room
     nwRoomsTodoRemaining = [ r|r<-allTodoRooms, not (doesRoomExcist nwGeneratedLevel (roomId r))]; -- filter on rooms that arent made yet
     allTodoRooms = connectedRooms++otherRoomsTodo; --combine the connected rooms with the rooms that where already todo
-    connectedRooms = (getConnectedRooms level (roomId roomTodo)); -- all rooms connected to roomTodo
+    connectedRooms = (getConnectedRooms roomedLevel (roomId roomTodo)); -- all rooms connected to roomTodo
 }
 
 
-getConnectedRooms::Level->ObjectId->[Room]
-getConnectedRooms level roomId = result
+getConnectedRooms::RoomedLevel->ObjectId->[Room]
+getConnectedRooms roomedLevel roomId = result
   where {
-    allRooms = rooms level;
+    allRooms = rooms roomedLevel;
     result = [rm | Just rm <- resultMaybe];
     resultMaybe = [findRoom allRooms cr_id| cr_id <- combinedRoomIds];
     combinedRoomIds = toRC++fromRC;
     toRC = [(room2 rc) |rc<-releventRC, (compareObjectId (room1 rc) roomId)];
     fromRC = [(room1 rc) |rc<-releventRC, (compareObjectId (room2 rc) roomId)];
-    releventRC = [ rc |rc<-(roomConnections level), (compareObjectId (room1 rc) roomId) || (compareObjectId (room2 rc) roomId)];
+    releventRC = [ rc |rc<-(roomConnections roomedLevel), (compareObjectId (room1 rc) roomId) || (compareObjectId (room2 rc) roomId)];
 }
 
-getConnectedRoomIds::Level->ObjectId->[ObjectId]
-getConnectedRoomIds level cur_roomId = result
+getConnectedRoomIds::RoomedLevel->ObjectId->[ObjectId]
+getConnectedRoomIds roomedLevel cur_roomId = result
   where {
-    allRooms = (getConnectedRooms level cur_roomId);
+    allRooms = (getConnectedRooms roomedLevel cur_roomId);
     result = [(roomId r) |r <- allRooms]
   }
 
 
-generateRoomInGeneratedLevel::GeneratedLevel->Room->[RoomConnector]->GeneratedLevel --make this room but make sure it is located on the valid position based on roomConnectors and the current generatedLevel
-generateRoomInGeneratedLevel gLevel room roomConnectors =
+generateRoomInLevel::Level->Room->[RoomConnector]->Level --make this room but make sure it is located on the valid position based on roomConnectors and the current generatedLevel
+generateRoomInLevel gLevel room roomConnectors =
   --check if the room already excist in gLevel
   if (doesRoomExcist gLevel (roomId room))
     then gLevel
-    else addRoomToGeneratedLevel gLevel roomConnectors room
+    else addRoomToLevel gLevel roomConnectors room
 
 
-getOriginWorldPosition::GeneratedLevel->ObjectId->(Maybe Position) --looks like getTileData??
+getOriginWorldPosition::Level->ObjectId->(Maybe Position) --looks like getTileData??
 getOriginWorldPosition gLevel roomId = firstPosFromRoomId --Just (Position 0 0) --TODO
   where{
     allTiles = tiles (gl_grid gLevel);
@@ -81,7 +81,7 @@ getTilesWithWorldPosition allTiles roomId = filterEmptyRows
     tilesWithCorrectRoomId = [[(tile, Position x y) | (x, tile) <- zip[0..] row, compareObjectId (tileRoomId tile) roomId] | (y, row) <- zip[0..] allTiles ];
   }
 
-doesRoomExcist::GeneratedLevel->ObjectId->Bool --looks like: getOriginWorldPosition??
+doesRoomExcist::Level->ObjectId->Bool --looks like: getOriginWorldPosition??
 doesRoomExcist gLevel roomId = case (getOriginWorldPosition gLevel roomId) of
   Just val -> True
   Nothing -> False
@@ -90,28 +90,28 @@ doesRoomExcist gLevel roomId = case (getOriginWorldPosition gLevel roomId) of
 
 
 
-addRoomToGeneratedLevel::GeneratedLevel->[RoomConnector]->Room->GeneratedLevel
-addRoomToGeneratedLevel gLevel roomConnectors room =
+addRoomToLevel::Level->[RoomConnector]->Room->Level
+addRoomToLevel gLevel roomConnectors room =
   if (doesRoomExcist gLevel (roomId room))
     then gLevel --does already excist
   else
     --check there are RC that link to the nwRoom and to an room that already excist in the gLevel
     if ((length rcLinkingToExcistingRoom) <= 0)
-      then GeneratedLevel (gl_name gLevel) (grid room) -- create a new gLevel with only this room in it
+      then Level (gl_name gLevel) (grid room) -- create a new gLevel with only this room in it
       else addRoom rcToUse
     where {
       rcToUse = rcLinkingToExcistingRoom!!0;
       rcLinkingToExcistingRoom = [ rc | rc <-rcWithCurrentRoom, (doesRoomExcist gLevel (room1 rc)) || (doesRoomExcist gLevel (room2 rc))];
       rcWithCurrentRoom = [ rc|rc<-roomConnectors, ((objectId (room1 rc)) == (objectId (roomId room)) || (objectId (room2 rc)) == (objectId (roomId room)))];
-      addRoom::RoomConnector->GeneratedLevel;
+      addRoom::RoomConnector->Level;
       addRoom rc = if (compareObjectId (room2 rc) (roomId room))
-        then addGridToGeneratedLevel gLevel room (room1 rc) (roomOffset rc)  --rc.room1 == already in gLevel and rc.room2 == room
-        else addGridToGeneratedLevel gLevel room (room2 rc) (reverseVector2 (roomOffset rc))--REVERSE: rc.room2 == already in gLevel and rc.room1 == room, use reverse on rc.roomOffset
+        then addGridToLevel gLevel room (room1 rc) (roomOffset rc)  --rc.room1 == already in gLevel and rc.room2 == room
+        else addGridToLevel gLevel room (room2 rc) (reverseVector2 (roomOffset rc))--REVERSE: rc.room2 == already in gLevel and rc.room1 == room, use reverse on rc.roomOffset
     }
 
 {-
-addGridToGeneratedLevel::GeneratedLevel->Room->ObjectId->Vector2->GeneratedLevel
-addGridToGeneratedLevel gLevel nwRoom relativeToRoomId offset = resultGeneratedLevel
+addGridToLevel::GeneratedLevel->Room->ObjectId->Vector2->GeneratedLevel
+addGridToLevel gLevel nwRoom relativeToRoomId offset = resultGeneratedLevel
   where{
     generatedLevelAllTiles = tiles (gl_grid gLevel);
     tilePosExcistingRoom = getTilesWithWorldPosition generatedLevelAllTiles relativeToRoomId; --getTileData generatedLevelAllTiles startPos roomSize;
@@ -128,8 +128,8 @@ addGridToGeneratedLevel gLevel nwRoom relativeToRoomId offset = resultGeneratedL
 }-}
 
 {-
-addGridToGeneratedLevel2::GeneratedLevel->Room->ObjectId->Vector2->GeneratedLevel
-addGridToGeneratedLevel2 gLevel nwRoom relativeToRoomId offset = resultGeneratedLevel
+addGridToLevel2::GeneratedLevel->Room->ObjectId->Vector2->GeneratedLevel
+addGridToLevel2 gLevel nwRoom relativeToRoomId offset = resultGeneratedLevel
   where{
     generatedLevelAllTiles = tiles (gl_grid gLevel);
     tilePosExcistingRoom = getTilesWithWorldPosition generatedLevelAllTiles relativeToRoomId; --getTileData generatedLevelAllTiles startPos roomSize;
@@ -147,8 +147,8 @@ addGridToGeneratedLevel2 gLevel nwRoom relativeToRoomId offset = resultGenerated
 }
 
 
-addGridToGeneratedLevelOLD::GeneratedLevel->Room->ObjectId->Vector2->GeneratedLevel
-addGridToGeneratedLevelOLD gLevel nwRoom relativeToRoomId offset = resultGeneratedLevel
+addGridToLevelOLD::GeneratedLevel->Room->ObjectId->Vector2->GeneratedLevel
+addGridToLevelOLD gLevel nwRoom relativeToRoomId offset = resultGeneratedLevel
   where{
     generatedLevelAllTiles = tiles (gl_grid gLevel);
     tilePosExcistingRoom = getTilesWithWorldPosition generatedLevelAllTiles relativeToRoomId; --getTileData generatedLevelAllTiles startPos roomSize;
@@ -165,8 +165,8 @@ addGridToGeneratedLevelOLD gLevel nwRoom relativeToRoomId offset = resultGenerat
     resultGeneratedLevel = GeneratedLevel (gl_name gLevel) (Grid resultTiles);
 }
 
-addGridToGeneratedLevelOLD2::GeneratedLevel->Room->ObjectId->Vector2->GeneratedLevel
-addGridToGeneratedLevelOLD2 gLevel nwRoom relativeToRoomId offset = resultGeneratedLevel
+addGridToLevelOLD2::GeneratedLevel->Room->ObjectId->Vector2->GeneratedLevel
+addGridToLevelOLD2 gLevel nwRoom relativeToRoomId offset = resultGeneratedLevel
   where{
     generatedLevelAllTiles = tiles (gl_grid gLevel);
     tilePosExcistingRoom = getTilesWithWorldPosition generatedLevelAllTiles relativeToRoomId; --getTileData generatedLevelAllTiles startPos roomSize;
@@ -185,8 +185,8 @@ addGridToGeneratedLevelOLD2 gLevel nwRoom relativeToRoomId offset = resultGenera
     resultGeneratedLevel = GeneratedLevel (gl_name gLevel) (Grid resultTiles);
 }-}
 
-addGridToGeneratedLevel::GeneratedLevel->Room->ObjectId->Vector2->GeneratedLevel
-addGridToGeneratedLevel gLevel nwRoom relativeToRoomId offset = resultGeneratedLevel
+addGridToLevel::Level->Room->ObjectId->Vector2->Level
+addGridToLevel gLevel nwRoom relativeToRoomId offset = resultGeneratedLevel
   where{
     generatedLevelAllTiles = tiles (gl_grid gLevel);
     roomSize = getGridSize (tiles (grid nwRoom));
@@ -208,5 +208,5 @@ addGridToGeneratedLevel gLevel nwRoom relativeToRoomId offset = resultGeneratedL
     finalStartPos = ( if(fst offset)>=0 then (x startPos) else (fst offset),
                       if(snd offset)>=0 then (y startPos) else (snd offset)); --based on offset calc the startPos for the combined room
     resultTiles = combineTiles generatedLevelAllTiles combinedRoomTiles finalStartPos; --second combine the combined room-tiles in the generatedLevel-tiles
-    resultGeneratedLevel = GeneratedLevel (gl_name gLevel) (Grid resultTiles);
+    resultGeneratedLevel = Level (gl_name gLevel) (Grid resultTiles);
 }

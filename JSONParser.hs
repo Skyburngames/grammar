@@ -91,13 +91,13 @@ data GridPositionJSON = GridPositionJSON { -- only used in export to JSON
 -- ================================ CONVERT =========================================
 
 convertGame::Grammar.Game->JSONParser.Game
-convertGame game = JSONParser.Game (map convertGeneratedLevel (Grammar.levels game)) (Grammar.gameType game)
+convertGame game = JSONParser.Game (map convertLevel (Grammar.levels game)) (Grammar.gameType game)
 
 --convertLevel::Grammar.Level->JSONParser.Level
 --convertLevel level = JSONParser.Level (Grammar.name level) (map convertRoom (Grammar.rooms level)) (Grammar.roomConnections level)   --(map convertRoomConnector (Grammar.roomConnections level))
 
-convertGeneratedLevel::Grammar.GeneratedLevel->JSONParser.GeneratedLevel
-convertGeneratedLevel generatedLevel = JSONParser.GeneratedLevel (Grammar.gl_name generatedLevel) (convertGrid (Grammar.gl_grid generatedLevel))
+convertLevel::Grammar.Level->JSONParser.GeneratedLevel
+convertLevel generatedLevel = JSONParser.GeneratedLevel (Grammar.gl_name generatedLevel) (convertGrid (Grammar.gl_grid generatedLevel))
 
 --convertRoom::Grammar.Room->JSONParser.Room
 --convertRoom room = JSONParser.Room (Grammar.roomId room) (convertGrid (Grammar.grid room))

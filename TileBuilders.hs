@@ -16,9 +16,9 @@ import Grammar
 
 -- ============================================ TILEBUILDERS =====================================================
 {-
-tb_setTileType::TileType->InputData->Tile
+tb_setTileType::TileType->TileData->Tile
 tb_setTileType nwTileType (originalData,p,t,gen) = Tile nwTileType (entities t)
 -}
 
-tb_editTile::TileModifier->InputData->Tile
+tb_editTile::TileModifier->TileData->Tile
 tb_editTile tileModifierFunc (_,_,t,_) = tileModifierFunc t

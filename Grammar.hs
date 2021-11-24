@@ -11,7 +11,7 @@ module Grammar
     -- ARCHITECTURE --
     Game(..),
     GameType(..),
-    Level(..),
+    RoomedLevel(..),
     Room(..),
     RoomConnector(..),
     Rule(..),
@@ -21,12 +21,12 @@ module Grammar
     Tile(..),
     Grid(..),
     TileType(..),
-    GeneratedLevel(..),
+    Level(..),
     -- HELPER CLASSES --
     Position(..),
     Vector2(..),
-    InputData(..),
-    GridBuilderData(..),
+    TileData(..),
+    GridData(..),
     -- OriginalData(..),
     TileBuilder(..),
     TileCondition(..),
@@ -72,13 +72,13 @@ data Position = Position {
 
 type Vector2 = (Int, Int)
 
-type GridBuilderData = (Grid, StdGen)
--- InputData: OriginalData is always the same for each call provided by the caller, Position, Tile and StdGen are UNIQUE for each call!
-type InputData = (Grid,Position,Tile,StdGen) -- the data that is always fed to an TileCondition and TileBuilder
+type GridData = (Grid, StdGen)
+-- TileData: OriginalData is always the same for each call provided by the caller, Position, Tile and StdGen are UNIQUE for each call!
+type TileData = (Grid,Position,Tile,StdGen) -- the data that is always fed to an TileCondition and TileBuilder
 -- type OriginalData = (Grid)
-type TileBuilder = InputData->Tile
+type TileBuilder = TileData->Tile
 
-type TileCondition = InputData->Bool
+type TileCondition = TileData->Bool
 
 type TileModifier = (Tile->Tile)
 data ChanceCalculation = Highest| Cumulative | Average deriving (Show)
@@ -90,20 +90,17 @@ data ChanceCalculation = Highest| Cumulative | Average deriving (Show)
 
 -- --------------------------------- LayoutLayer -----------------------------------------
 data Game = Game {
-    levels :: [GeneratedLevel],
+    levels :: [Level],
     gameType :: GameType
 } deriving (Show, Generic)
 
-
 data GameType = FPS| TopDown deriving (Show, Generic)
 
-
-data Level = Level {
+data RoomedLevel = RoomedLevel {
     name:: String,
     rooms:: [Room],
     roomConnections:: [RoomConnector]
 } deriving (Show, Generic)
-
 
 data Room = Room {
     roomId:: ObjectId,
@@ -113,9 +110,6 @@ data Room = Room {
 data RoomConnector = RoomConnector {
     room1:: ObjectId,
     room2:: ObjectId,
-    -- r1ConnectionPoint::Position, -- the position in this room where the door is located (from bottom left)
-    -- r2ConnectionPoint::Position, -- the position in this room where the door is located (from bottom left)
-    -- aligmentPreference::Alignment
     roomOffset:: Vector2
 } deriving (Show, Generic)
 
@@ -123,13 +117,11 @@ data Grid = Grid {
     tiles:: [[Tile]]
 } deriving (Show, Generic)
 
-
 data Tile = Tile {
     tileType:: TileType,
     entities:: [Entity],
     tileRoomId::ObjectId
 } deriving (Show, Generic)
-
 
 data TileType = Solid | Open deriving (Show, Generic)
 
@@ -139,14 +131,7 @@ data Entity =
         entityType:: EntityType
     } deriving (Show, Generic)
 
-
 data EntityType = Enemy| Powerup | Player| Finish deriving (Show, Generic)
-
-
--- IDS
--- newtype EntityId = EntityId Int deriving (Show)
--- newtype RoomId = RoomId Int deriving (Show)
-
 
 newtype ObjectId = ObjectId {
     objectId :: Int
@@ -155,7 +140,7 @@ newtype ObjectId = ObjectId {
 
 
 -- --------------------------------- GridLayer -----------------------------------------
-data GeneratedLevel = GeneratedLevel {
+data Level = Level {
   gl_name:: String,
   gl_grid:: Grid
 } deriving (Show, Generic)
@@ -215,28 +200,20 @@ combineGrids r@(Grid {tiles=tilesG1}) grid2 connectionPoint = r {tiles = combine
     combinedTiles = combineTiles tilesG1 (tiles grid2) connectionPoint
 }
 
--- combineTiles::[[Tile]]->[[Tile]]->Vector2->[[Tile]]
 combineTiles::[[Tile]]->[[Tile]]->Vector2->[[Tile]]
 combineTiles tiles1 tiles2 connectionPoint = afterAddingTiles2
   where{
-    --tiles1 = tiles (grid room1);
-    --tiles2 = tiles (grid room2);
-    --room1Id = roomId room1;
-    --room2Id = roomId room2;
     connectionX = fst connectionPoint;
     connectionY = snd connectionPoint;
     w1 = getGridWidth tiles1;
     h1 = getGridHeight tiles1;
     w2 = getGridWidth tiles2;
     h2 = getGridHeight tiles2;
-    totalWidth = if(connectionX >= 0) then (max (connectionX + w2) w1) else (abs connectionX) + w1; --(max w1 w2) + abs connectionX;
-    totalHeight = if(connectionY >= 0) then (max (connectionY + h2) h1) else (abs connectionY) + h1; --(max h1 h2) + abs connectionY;
+    totalWidth = if(connectionX >= 0) then (max (connectionX + w2) w1) else (abs connectionX) + w1;
+    totalHeight = if(connectionY >= 0) then (max (connectionY + h2) h1) else (abs connectionY) + h1;
     emptyTiles = generateTiles (ObjectId (-1)) totalWidth totalHeight;
     t1StartX = totalWidth - w1 - connectionX;
     t1StartY = totalHeight - h1 - connectionY;
-
-    --tiles1WithRoomId = setTilesRoomId room1Id tiles1;
-    --tiles2WithRoomId = setTilesRoomId room2Id tiles2;
 
     afterAddingTiles1 = addTiles emptyTiles tiles1 (calcStartPosTile1 connectionX , calcStartPosTile1 connectionY);
     afterAddingTiles2 = addTiles afterAddingTiles1 tiles2 (calcStartPosTile2 connectionX , calcStartPosTile2 connectionY);
@@ -252,9 +229,9 @@ addTiles originalTiles nwTiles (startX, startY) = [[progressTile tile (x,y) | (x
     w = getGridWidth nwTiles;
     h = getGridHeight nwTiles;
     progressTile::Tile->Vector2->Tile;
-    progressTile tile (curX, curY) = if (curX >= startX && curY >= startY && curX < (startX+ w) && curY < (startY+h)) --also catch on curX < originalTiles.width and curY < originalTiles.height
-      then getTile nwTiles (Position (curX-startX) (curY-startY)) -- tile is in nwTiles
-      else getTile originalTiles (Position curX curY) --tile is in originalTiles
+    progressTile tile (curX, curY) = if (curX >= startX && curY >= startY && curX < (startX+ w) && curY < (startY+h))
+      then getTile nwTiles (Position (curX-startX) (curY-startY))
+      else getTile originalTiles (Position curX curY)
   }
 
 

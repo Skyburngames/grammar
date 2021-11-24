@@ -2,7 +2,7 @@ module RoomConnectionGenerator
 (
   connectRoomHorizontal,
   connectRoomVertical,
-  openCriticalPathLevel,
+  openCriticalPathRoomedLevel,
 
   --TESTING
   getCriticalPositionsInRoom,
@@ -29,11 +29,11 @@ connectRoomVertical room1 room2 = RoomConnector (roomId room1) (roomId room2) (0
 
 
 -- PATHFINDING --
-openCriticalPathLevel::Level->Level
-openCriticalPathLevel level = nwLevel --openCriticalPathRoom on each Room
+openCriticalPathRoomedLevel::RoomedLevel->RoomedLevel
+openCriticalPathRoomedLevel roomedLevel = nwRoomedLevel --openCriticalPathRoom on each Room
   where{
-    nwLevel = Level (name level) (map (openCriticalPathRoom (roomConnections level)) (rooms level))
-    (roomConnections level);
+    nwRoomedLevel = RoomedLevel (name roomedLevel) (map (openCriticalPathRoom (roomConnections roomedLevel)) (rooms roomedLevel))
+    (roomConnections roomedLevel);
 }
 
 openCriticalPathRoom::[RoomConnector]->Room->Room
