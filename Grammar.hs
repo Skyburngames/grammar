@@ -177,21 +177,21 @@ divideIntCeil::Int->Int->Int
 divideIntCeil value divider = ceiling ((toFloat value) / (toFloat divider))
 -- ================================== Grid generation ==================================
 
-createRoom::Int->Int->Int->Room
-createRoom objId width height = Room nwObjId nwGrid
+createRoom::Int->Int->Int->TileType->Room
+createRoom objId width height tileType= Room nwObjId nwGrid
   where {
-    nwGrid = Grid (generateTiles nwObjId width height);
+    nwGrid = Grid (generateTiles nwObjId width height tileType);
     nwObjId = (ObjectId objId)
 }
 
-generateTiles::ObjectId->Int->Int->[[Tile]]
-generateTiles _ _ 0 = [[]]
-generateTiles _roomId width height = if(height == 1) then [generateTilesRow width] else
-    generateTilesRow width : generateTiles _roomId width (height-1)
+generateTiles::ObjectId->Int->Int->TileType->[[Tile]]
+generateTiles _ _ 0 _ = [[]]
+generateTiles _roomId width height tileType = if(height == 1) then [generateTilesRow width] else
+    generateTilesRow width : generateTiles _roomId width (height-1) tileType
     where {
         generateTilesRow::Int->[Tile];
         generateTilesRow 0 = [];
-        generateTilesRow x = (createTile _roomId Open []): generateTilesRow (x-1)
+        generateTilesRow x = (createTile _roomId tileType []): generateTilesRow (x-1)
     }
 
 combineGrids::Grid->Grid->Vector2->Grid
@@ -211,7 +211,7 @@ combineTiles tiles1 tiles2 connectionPoint = afterAddingTiles2
     h2 = getGridHeight tiles2;
     totalWidth = if(connectionX >= 0) then (max (connectionX + w2) w1) else (abs connectionX) + w1;
     totalHeight = if(connectionY >= 0) then (max (connectionY + h2) h1) else (abs connectionY) + h1;
-    emptyTiles = generateTiles (ObjectId (-1)) totalWidth totalHeight;
+    emptyTiles = generateTiles (ObjectId (-1)) totalWidth totalHeight Solid;
     t1StartX = totalWidth - w1 - connectionX;
     t1StartY = totalHeight - h1 - connectionY;
 

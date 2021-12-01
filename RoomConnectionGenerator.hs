@@ -28,6 +28,7 @@ connectRoomVertical room1 room2 = RoomConnector (roomId room1) (roomId room2) (0
 
 
 
+
 -- PATHFINDING --
 openCriticalPathRoomedLevel::RoomedLevel->RoomedLevel
 openCriticalPathRoomedLevel roomedLevel = nwRoomedLevel --openCriticalPathRoom on each Room
@@ -117,6 +118,7 @@ doEntitiesContainCriticalPoint (currentEntity:otherEntities) = if(isEntityTypeCr
     isEntityTypeCritical::EntityType->Bool;
     isEntityTypeCritical Player = True;
     isEntityTypeCritical Finish = True;
+    isEntityTypeCritical Powerup = True;
     isEntityTypeCritical _ = False;
 }
 
