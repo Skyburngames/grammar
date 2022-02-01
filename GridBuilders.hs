@@ -8,6 +8,9 @@ module GridBuilders
 import Grammar
 import System.Random
 import RandomUtils
+import Conditions
+import TileBuilders
+
 
 
 
@@ -25,6 +28,7 @@ runMultipleGridBuilders (startGrid,startGen) (f:fs) = runMultipleGridBuilders (n
     nwGrid = f (startGrid, startGen);
     nextGen = snd (split startGen)
   }
+
 
 gb_randomTile::Vector2->Vector2->(TileBuilder)->GridData->Grid
 gb_randomTile rangeX rangeY tileBuilderFunc (startGrid, originalGen) = Grid nwTiles

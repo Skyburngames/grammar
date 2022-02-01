@@ -10,6 +10,7 @@ import TileModifiers
 import Conditions
 import RoomConnectionGenerator
 import GenerateLevel
+import HelperCombinators
 
 import RandomUtils
 import System.Random
@@ -20,9 +21,9 @@ import System.Random
 main :: IO ()
 main = do
     -- ========================== GENERATE A PRODUCT ====================================---
-    -- generateJSON game1 "C:/Users/kevin/PG_Game/Assets" -- AW-PW
+    generateJSON game1 "C:/Users/kevin/PG_Game/Assets" -- AW-PW
     -- print (getDoorPositionsInRoom (roomConnections roomedlevel3) generatedRoom1)
-    generateJSON game1 "C:/Users/Kevin/Projecten/UnityProjecten/PG_Game/Assets" -- Laptop
+    -- generateJSON game1 "C:/Users/Kevin/Projecten/UnityProjecten/PG_Game/Assets" -- Laptop
     -- print(toFloat 20)
     --print(test (con_isTileType Solid) 0.25 Highest ((grid3, mkStdGen 54566), testPos1, (getTile grid3 testPos1), mkStdGen 123))
     -- print afterAddingRoom2TEST
@@ -105,6 +106,24 @@ startRoom3 = createRoom 3 5 5 Open
 startRoom4 = createRoom 4 5 5 Open
 
 
+exampleRoom = runGridBuildersOnRoom startRoom startGen [
+    gb_makeAllTilesOpen,
+    gb_createWall 1 1,
+    gb_createWall 3 1,
+    gb_createWall 2 3,
+    gb_createWall 1 3,
+    gb_addEntityToTile 1 3 finishEntity,
+    gb_createBorderAroundRoom
+  ]
+  where
+    roomId = 3
+    startRoom = (createEmptyRoom roomId 5 5)
+    finishEntity = createFinishEntity finishId
+    finishId = 1
+
+
+    
+
 startRoom = runGridBuildersOnRoom startRoom1 startGen [
   --gb_randomTile (2,2) (2,2) (tb_editTile (setTileType Solid)),
   -- gb_allTiles (con_neighbourTileCondition (con_isTileType Solid) 0.6 Cumulative) (tb_editTile (setTileType Solid)),
@@ -167,6 +186,9 @@ generatedRoom4 = runGridBuildersOnRoom startRoom4 startGen [
 
 
 
+
+
+
 createRandomRoom::Int->Room
 createRandomRoom roomIdNr = runGridBuildersOnRoom (createRoom roomIdNr 5 5 Solid) startGen [
   gb_randomTile (0,4) (0,4) (tb_editTile (setTileType Solid)),
@@ -219,9 +241,9 @@ conC = connectRoomHorizontal randomRoom2 randomRoom3
 conD = connectRoomVertical randomRoom3 randomRoom4
 conE = connectRoomHorizontal randomRoom4 randomRoom5
 conF = connectRoomHorizontal randomRoom3 randomRoom6
-conG = connectRoomVertical randomRoom5 endRoom
+conG = connectRoomVertical randomRoom5 exampleRoom
 
-conH = connectRoomHorizontal randomRoom7 endRoom
+conH = connectRoomHorizontal randomRoom7 exampleRoom
 conI = connectRoomHorizontal randomRoom8 randomRoom7
 
 
@@ -232,7 +254,7 @@ conI = connectRoomHorizontal randomRoom8 randomRoom7
 --roomedLevel1 = RoomedLevel "level1" [startRoom, generatedRoom2, endRoom, generatedRoom4] [conA, conB, conC]
 --roomedLevel2 = RoomedLevel "level2" [startRoom, generatedRoom2, generatedRoom4] [conA, conC]
 --roomedLevel3 = RoomedLevel "level3" [startRoom] [conA]
-roomedLevel4 = RoomedLevel "level4" [startRoom, randomRoom1, randomRoom2, randomRoom3, randomRoom4, randomRoom5, randomRoom6, endRoom] [conA, conB, conC, conD, conE, conF,conG]
+roomedLevel4 = RoomedLevel "level4" [startRoom, randomRoom1, randomRoom2, randomRoom3, randomRoom4, randomRoom5, randomRoom6, exampleRoom] [conA, conB, conC, conD, conE, conF,conG]
 
 
 
