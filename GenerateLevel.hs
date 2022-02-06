@@ -11,7 +11,7 @@ module GenerateLevel
   getTilesWithWorldPosition,
   addRoomToLevel,
   addGridToLevel,
-  doesRoomExcist,
+  doesRoomExist,
 ) where
 
 import Grammar
@@ -26,11 +26,11 @@ progressRoomedLevel roomedLevel = generateLevel emptyGeneratedLevel roomedLevel 
 generateLevel::Level->RoomedLevel->[Room]->Level
 generateLevel gLevel _ [] = gLevel
 generateLevel gLevel roomedLevel (roomTodo: otherRoomsTodo) =
-  if(doesRoomExcist gLevel (roomId roomTodo)) then generateLevel gLevel roomedLevel nwRoomsTodoRemaining
+  if(doesRoomExist gLevel (roomId roomTodo)) then generateLevel gLevel roomedLevel nwRoomsTodoRemaining
     else generateLevel nwGeneratedLevel roomedLevel nwRoomsTodoRemaining
   where {
     nwGeneratedLevel = generateRoomInLevel gLevel roomTodo (roomConnections roomedLevel); -- generate the room
-    nwRoomsTodoRemaining = [ r|r<-allTodoRooms, not (doesRoomExcist nwGeneratedLevel (roomId r))]; -- filter on rooms that arent made yet
+    nwRoomsTodoRemaining = [ r|r<-allTodoRooms, not (doesRoomExist nwGeneratedLevel (roomId r))]; -- filter on rooms that arent made yet
     allTodoRooms = connectedRooms++otherRoomsTodo; --combine the connected rooms with the rooms that where already todo
     connectedRooms = (getConnectedRooms roomedLevel (roomId roomTodo)); -- all rooms connected to roomTodo
 }
@@ -59,7 +59,7 @@ getConnectedRoomIds roomedLevel cur_roomId = result
 generateRoomInLevel::Level->Room->[RoomConnector]->Level --make this room but make sure it is located on the valid position based on roomConnectors and the current generatedLevel
 generateRoomInLevel gLevel room roomConnectors =
   --check if the room already excist in gLevel
-  if (doesRoomExcist gLevel (roomId room))
+  if (doesRoomExist gLevel (roomId room))
     then gLevel
     else addRoomToLevel gLevel roomConnectors room
 
@@ -81,8 +81,8 @@ getTilesWithWorldPosition allTiles roomId = filterEmptyRows
     tilesWithCorrectRoomId = [[(tile, Position x y) | (x, tile) <- zip[0..] row, compareObjectId (tileRoomId tile) roomId] | (y, row) <- zip[0..] allTiles ];
   }
 
-doesRoomExcist::Level->ObjectId->Bool --looks like: getOriginWorldPosition??
-doesRoomExcist gLevel roomId = case (getOriginWorldPosition gLevel roomId) of
+doesRoomExist::Level->ObjectId->Bool --looks like: getOriginWorldPosition??
+doesRoomExist gLevel roomId = case (getOriginWorldPosition gLevel roomId) of
   Just val -> True
   Nothing -> False
 
@@ -92,7 +92,7 @@ doesRoomExcist gLevel roomId = case (getOriginWorldPosition gLevel roomId) of
 
 addRoomToLevel::Level->[RoomConnector]->Room->Level
 addRoomToLevel gLevel roomConnectors room =
-  if (doesRoomExcist gLevel (roomId room))
+  if (doesRoomExist gLevel (roomId room))
     then gLevel --does already excist
   else
     --check there are RC that link to the nwRoom and to an room that already excist in the gLevel
@@ -101,7 +101,7 @@ addRoomToLevel gLevel roomConnectors room =
       else addRoom rcToUse
     where {
       rcToUse = rcLinkingToExcistingRoom!!0;
-      rcLinkingToExcistingRoom = [ rc | rc <-rcWithCurrentRoom, (doesRoomExcist gLevel (room1 rc)) || (doesRoomExcist gLevel (room2 rc))];
+      rcLinkingToExcistingRoom = [ rc | rc <-rcWithCurrentRoom, (doesRoomExist gLevel (room1 rc)) || (doesRoomExist gLevel (room2 rc))];
       rcWithCurrentRoom = [ rc|rc<-roomConnectors, ((objectId (room1 rc)) == (objectId (roomId room)) || (objectId (room2 rc)) == (objectId (roomId room)))];
       addRoom::RoomConnector->Level;
       addRoom rc = if (compareObjectId (room2 rc) (roomId room))

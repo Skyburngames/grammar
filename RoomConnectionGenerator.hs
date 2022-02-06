@@ -1,7 +1,9 @@
 module RoomConnectionGenerator
 (
-  connectRoomHorizontal,
-  connectRoomVertical,
+  connectRoomRight,
+  connectRoomUp,
+  connectRoomLeft,
+  connectRoomDown,
   openCriticalPathRoomedLevel,
 
   --TESTING
@@ -16,14 +18,17 @@ import Pathfinder
 
 
 
-connectRoomHorizontal::Room->Room->RoomConnector --places room2 on the right of room1
---connectRoomHorizontal room1 room2 = RoomConnector (roomId room1) (roomId room2) (Position 4 2) (Position 0 2) Horizontal
-connectRoomHorizontal room1 room2 = RoomConnector (roomId room1) (roomId room2) (5,0)
+connectRoomRight::Room->Room->RoomConnector --places room2 on the right of room1
+connectRoomRight room1 room2 = RoomConnector (roomId room1) (roomId room2) (5,0)
 
-connectRoomVertical::Room->Room->RoomConnector -- places room2 below room1
---connectRoomVertical room1 room2 = RoomConnector (roomId room1) (roomId room2) (Position 2 0) (Position 2 4) Vertical
-connectRoomVertical room1 room2 = RoomConnector (roomId room1) (roomId room2) (0,5)
+connectRoomLeft::Room->Room->RoomConnector --places room2 on the left of room1
+connectRoomLeft room1 room2 = RoomConnector (roomId room1) (roomId room2) (-5,0)
 
+connectRoomUp::Room->Room->RoomConnector -- places room2 above room1
+connectRoomUp room1 room2 = RoomConnector (roomId room1) (roomId room2) (0,5)
+
+connectRoomDown::Room->Room->RoomConnector -- places room2 below room1
+connectRoomDown room1 room2 = RoomConnector (roomId room1) (roomId room2) (0,-5)
 
 
 

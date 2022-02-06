@@ -98,7 +98,7 @@ grid4 = runMultipleGridBuilders startOriginalData [
 --generatedRoom3 = Room (ObjectId 3) r3
 --generatedRoom4 = Room (ObjectId 4) r4
 
-startGen = mkStdGen 323
+
 
 startRoom1 = createRoom 1 5 5 Open
 startRoom2 = createRoom 2 5 5 Open
@@ -122,19 +122,9 @@ exampleRoom = runGridBuildersOnRoom startRoom startGen [
     finishId = 1
 
 
-    
 
-startRoom = runGridBuildersOnRoom startRoom1 startGen [
-  --gb_randomTile (2,2) (2,2) (tb_editTile (setTileType Solid)),
-  -- gb_allTiles (con_neighbourTileCondition (con_isTileType Solid) 0.6 Cumulative) (tb_editTile (setTileType Solid)),
-  --gb_allTiles (con_gridBorder) (tb_editTile (setTileType Solid)),
-  gb_allTiles (con_always True) (tb_editTile (setTileType Solid)),
-  gb_randomTile (2,2) (2,2) (tb_editTile ((addEntity (Entity (ObjectId 1) Player)).(setTileType Open))),
-  gb_allTiles (con_neighbourTileCondition (con_isTileType Open) 0.6 Cumulative) (tb_editTile (setTileType Open)),
-  gb_allTiles (con_neighbourTileCondition (con_isTileType Open) 0.35 Cumulative) (tb_editTile (setTileType Open)),
-  gb_allTiles (con_gridBorder) (tb_editTile (setTileType Solid))
-  -- gb_randomTile (3,3) (3,3) (tb_editTile ((addEntity (Entity (ObjectId 1) Finish)).(setTileType Open)))
-  ]
+
+
 
 generatedRoom2 = runGridBuildersOnRoom startRoom2 startGen [
     gb_allTiles (con_always True) (tb_editTile (setTileType Solid)),
@@ -144,15 +134,7 @@ generatedRoom2 = runGridBuildersOnRoom startRoom2 startGen [
     gb_allTiles (con_neighbourTileCondition (con_isTileType Open) 0.3 Cumulative) (tb_editTile (setTileType Open)),
     gb_allTiles (con_gridBorder) (tb_editTile (setTileType Solid))
   ]
-endRoom = runGridBuildersOnRoom startRoom3 startGen [
-    gb_allTiles (con_always True) (tb_editTile (setTileType Solid)),
-    gb_randomTile (0,4) (0,4) (tb_editTile (setTileType Open)),
-    gb_randomTile (0,4) (0,4) (tb_editTile (setTileType Open)),
-    gb_randomTile (0,4) (0,4) (tb_editTile (setTileType Open)),
-    gb_allTiles (con_neighbourTileCondition (con_isTileType Open) 0.3 Cumulative) (tb_editTile (setTileType Open)),
-    gb_randomTile (1,3) (1,3) (tb_editTile ((addEntity (Entity (ObjectId 1) Finish)).(setTileType Open))),
-    gb_allTiles (con_gridBorder) (tb_editTile (setTileType Solid))
-  ]
+
 generatedRoom4 = runGridBuildersOnRoom startRoom4 startGen [
     gb_allTiles (con_gridBorder) (tb_editTile (setTileType Solid)),
     gb_randomTile (0,4) (0,4) (tb_editTile (setTileType Solid)),
@@ -186,81 +168,83 @@ generatedRoom4 = runGridBuildersOnRoom startRoom4 startGen [
 
 
 
+-- ========= the start stdGen =======
+startGen = mkStdGen 8411 --create a starting stdGen based on the seed 6302
 
-
-
+-- A helper function to quickly create a random room
 createRandomRoom::Int->Room
-createRandomRoom roomIdNr = runGridBuildersOnRoom (createRoom roomIdNr 5 5 Solid) startGen [
+createRandomRoom roomIdNr = runGridBuildersOnRoom (createRoom roomIdNr 5 5 Open) startGen [
   gb_randomTile (0,4) (0,4) (tb_editTile (setTileType Solid)),
   gb_randomTile (0,4) (0,4) (tb_editTile (setTileType Solid)),
   gb_randomTile (0,4) (0,4) (tb_editTile (setTileType Solid)),
   gb_randomTile (0,4) (0,4) (tb_editTile (setTileType Solid)),
   gb_randomTile (0,4) (0,4) (tb_editTile (setTileType Solid)),
-  gb_allTiles (con_neighbourTileCondition (con_isTileType Open) 0.8 Average) (tb_editTile (setTileType Open)),
+  gb_allTiles (con_neighbourTileCondition (con_isTileType Open) 0.9 Cumulative) (tb_editTile (setTileType Open)),
   gb_allTiles (con_neighbourTileCondition (con_isTileType Open) 0.8 Average) (tb_editTile (setTileType Open)),
   gb_allTiles (con_neighbourTileCondition (con_isTileType Open) 0.8 Average) (tb_editTile (setTileType Open)),
   gb_randomTile (1,3) (1,3) (tb_editTile ((addEntity (Entity (ObjectId 1) Powerup)).(setTileType Open))),
+  gb_allTiles (con_gridBorder) (tb_editTile (setTileType Solid))
+  ]
+
+-- A helper function to quickly create a random room with an Enemy
+createRandomRoomWithEnemy::Int->Room
+createRandomRoomWithEnemy roomIdNr = runGridBuildersOnRoom (createRoom roomIdNr 5 5 Open) startGen [
+  gb_randomTile (0,4) (0,4) (tb_editTile (setTileType Solid)),
+  gb_randomTile (0,4) (0,4) (tb_editTile (setTileType Solid)),
+  gb_randomTile (0,4) (0,4) (tb_editTile (setTileType Solid)),
+  gb_randomTile (0,4) (0,4) (tb_editTile (setTileType Solid)),
+  gb_randomTile (0,4) (0,4) (tb_editTile (setTileType Solid)),
+  gb_allTiles (con_neighbourTileCondition (con_isTileType Open) 0.1 Average) (tb_editTile (setTileType Open)),
+  gb_allTiles (con_neighbourTileCondition (con_isTileType Open) 0.1 Average) (tb_editTile (setTileType Open)),
+  gb_allTiles (con_neighbourTileCondition (con_isTileType Open) 0.1 Average) (tb_editTile (setTileType Open)),
+  gb_randomTile (1,3) (1,3) (tb_editTile ((addEntity (Entity (ObjectId 1) Enemy)).(setTileType Open))),
 
   gb_allTiles (con_gridBorder) (tb_editTile (setTileType Solid))
   -- gb_randomTile (3,3) (3,3) (tb_editTile ((addEntity (Entity (ObjectId 1) Finish)).(setTileType Open)))
   ]
 
-randomRoom1 = createRandomRoom 5
-randomRoom2 = createRandomRoom 6
-randomRoom3 = createRandomRoom 7
-randomRoom4 = createRandomRoom 8
-randomRoom5 = createRandomRoom 9
-randomRoom6 = createRandomRoom 10
-randomRoom7 = createRandomRoom 11
-randomRoom8 = createRandomRoom 12
+-- ================= Generate the rooms =============================
+startRoom = runGridBuildersOnRoom startRoom startGen [
+    gb_allTiles (con_always True) (tb_editTile (setTileType Solid)),
+    gb_randomTile (2,2) (2,2) (tb_editTile ((addEntity (Entity (ObjectId 1) Player)).(setTileType Open))),
+    gb_allTiles (con_neighbourTileCondition (con_isTileType Open) 0.6 Cumulative) (tb_editTile (setTileType Open)),
+    gb_allTiles (con_neighbourTileCondition (con_isTileType Open) 0.35 Cumulative) (tb_editTile (setTileType Open)),
+    gb_allTiles (con_gridBorder) (tb_editTile (setTileType Solid))
+  ]
+  where
+    startRoom = createRoom 1 5 5 Open
+
+randomRoom1 = createRandomRoomWithEnemy 2
+randomRoom2 = createRandomRoom 3
+randomRoom3 = createRandomRoomWithEnemy 4
+randomRoom4 = createRandomRoom 5
+
+endRoom = runGridBuildersOnRoom endRoom startGen [
+    gb_allTiles (con_always True) (tb_editTile (setTileType Solid)),
+    gb_randomTile (0,4) (0,4) (tb_editTile (setTileType Open)),
+    gb_randomTile (0,4) (0,4) (tb_editTile (setTileType Open)),
+    gb_randomTile (0,4) (0,4) (tb_editTile (setTileType Open)),
+    gb_allTiles (con_neighbourTileCondition (con_isTileType Open) 0.3 Cumulative) (tb_editTile (setTileType Open)),
+    gb_randomTile (1,3) (1,3) (tb_editTile ((addEntity (Entity (ObjectId 1) Finish)).(setTileType Open))),
+    gb_allTiles (con_gridBorder) (tb_editTile (setTileType Solid))
+  ]
+  where
+    endRoom = createRoom 6 5 5 Open
+
+-- ================= Setup the connections =============================
+conA = connectRoomDown startRoom randomRoom1
+conB = connectRoomLeft randomRoom1 randomRoom2
+conC = connectRoomUp randomRoom2 randomRoom3
+conD = connectRoomUp randomRoom3 randomRoom4
+conE = connectRoomRight randomRoom4 endRoom
 
 
+roomedLevel = RoomedLevel "level1" [startRoom,randomRoom1, randomRoom2, randomRoom3, randomRoom4, endRoom] [conA, conB, conC, conD, conE]
 
-
-{-
-conA = connectRoomHorizontal startRoom randomRoom1
-conB = connectRoomVertical randomRoom1 randomRoom4
-conC = connectRoomHorizontal randomRoom4 endRoom
-conD = connectRoomVertical startRoom randomRoom3
-conE = connectRoomVertical endRoom randomRoom2
--}
-
---6pack
-{-
-conA = connectRoomHorizontal startRoom randomRoom1
-conB = connectRoomVertical randomRoom1 randomRoom4
-conC = connectRoomHorizontal randomRoom4 endRoom
-conD = connectRoomVertical startRoom randomRoom3
-conE = connectRoomHorizontal randomRoom1 randomRoom2
--}
-
---rocket
-conA = connectRoomVertical startRoom randomRoom1
-conB = connectRoomHorizontal randomRoom1 randomRoom2
-conC = connectRoomHorizontal randomRoom2 randomRoom3
-conD = connectRoomVertical randomRoom3 randomRoom4
-conE = connectRoomHorizontal randomRoom4 randomRoom5
-conF = connectRoomHorizontal randomRoom3 randomRoom6
-conG = connectRoomVertical randomRoom5 exampleRoom
-
-conH = connectRoomHorizontal randomRoom7 exampleRoom
-conI = connectRoomHorizontal randomRoom8 randomRoom7
-
-
-
-
--- TEST 4 ROOMS
--- Create the level that is exported
---roomedLevel1 = RoomedLevel "level1" [startRoom, generatedRoom2, endRoom, generatedRoom4] [conA, conB, conC]
---roomedLevel2 = RoomedLevel "level2" [startRoom, generatedRoom2, generatedRoom4] [conA, conC]
---roomedLevel3 = RoomedLevel "level3" [startRoom] [conA]
-roomedLevel4 = RoomedLevel "level4" [startRoom, randomRoom1, randomRoom2, randomRoom3, randomRoom4, randomRoom5, randomRoom6, exampleRoom] [conA, conB, conC, conD, conE, conF,conG]
-
-
-
-
-levelWithDoors = openCriticalPathRoomedLevel roomedLevel4
+-- ========== Create the level =======
+levelWithDoors = openCriticalPathRoomedLevel roomedLevel
 level1 = progressRoomedLevel levelWithDoors
+game1 = Game [level1] TopDown
 
 -- ------- TEST -----------
 -- grid1 = tiles (gl_grid level1)
@@ -269,5 +253,3 @@ level1 = progressRoomedLevel levelWithDoors
 -- testPrint1 = addGridToGeneratedLevel level1 generatedRoom3 (roomId generatedRoom2) ((-5),0)
 -- resultGL = GeneratedLevel "level3" (Grid grid2)
 -- ------- ------ -----------
-
-game1 = Game [level1] TopDown

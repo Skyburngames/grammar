@@ -194,12 +194,20 @@ generateTiles _roomId width height tileType = if(height == 1) then [generateTile
         generateTilesRow x = (createTile _roomId tileType []): generateTilesRow (x-1)
     }
 
+-- combineGrids::Grid->Grid->Vector2->Grid
+--combineGrids r@(Grid {tiles=tilesG1}) grid2 connectionPoint = r {tiles = combinedTiles}
+--  where {
+--    combinedTiles = combineTiles tilesG1 (tiles grid2) connectionPoint
+--}
+
+-- This function can encapsulates the combineTiles method and can be used with 2 grids
 combineGrids::Grid->Grid->Vector2->Grid
 combineGrids r@(Grid {tiles=tilesG1}) grid2 connectionPoint = r {tiles = combinedTiles}
   where {
     combinedTiles = combineTiles tilesG1 (tiles grid2) connectionPoint
 }
 
+{-
 combineTiles::[[Tile]]->[[Tile]]->Vector2->[[Tile]]
 combineTiles tiles1 tiles2 connectionPoint = afterAddingTiles2
   where{
@@ -221,8 +229,44 @@ combineTiles tiles1 tiles2 connectionPoint = afterAddingTiles2
     calcStartPosTile1 v = if v >= 0 then 0 else -v;
     calcStartPosTile2::Int->Int;
     calcStartPosTile2 v = if v > 0 then v else 0;
-}
+} -}
 
+-- This function places the second [[Tile]] on top of the first [[Tile]] with connectionPiont as the offset
+-- The offset is calculated based on the top left tile in grid1 and grid2
+combineTiles::[[Tile]]->[[Tile]]->Vector2->[[Tile]]
+combineTiles tiles1 tiles2 connectionPoint = afterAddingTiles2
+  where{
+    connectionX = fst connectionPoint;
+    connectionY = snd connectionPoint;
+
+    -- calculate the size of the new grid where tiles1 and tiles2 are combined based on the connectionPoint
+    w1 = getGridWidth tiles1;
+    h1 = getGridHeight tiles1;
+    w2 = getGridWidth tiles2;
+    h2 = getGridHeight tiles2;
+    -- calculate the totalWidth and totalHeight based on a positive or negative value of connectionPoint
+    totalWidth = if(connectionX >= 0) then (max (connectionX + w2) w1) else (abs connectionX) + w1;
+    totalHeight = if(connectionY >= 0) then (max (connectionY + h2) h1) else (abs connectionY) + h1;
+
+    -- create a new grid that is large enough to fit tiles1 and tiles2 incl the connectionPoint
+    emptyTiles = generateTiles (ObjectId (-1)) totalWidth totalHeight Solid;
+
+    --t1StartX = totalWidth - w1 - connectionX;
+    --t1StartY = totalHeight - h1 - connectionY;
+
+    -- create a empty grid that is large enough and add tiles1
+    afterAddingTiles1 = addTiles emptyTiles tiles1 (calcStartPosTile1 connectionX , calcStartPosTile1 connectionY);
+    -- after tiles1 are added, add tiles2
+    afterAddingTiles2 = addTiles afterAddingTiles1 tiles2 (calcStartPosTile2 connectionX , calcStartPosTile2 connectionY);
+
+    -- calculate the starting position when adding a grid with tiles
+    calcStartPosTile1::Int->Int;
+    calcStartPosTile1 v = if v >= 0 then 0 else -v;
+    calcStartPosTile2::Int->Int;
+    calcStartPosTile2 v = if v > 0 then v else 0;
+  }
+
+{-
 addTiles::[[Tile]]->[[Tile]]->Vector2->[[Tile]]
 addTiles originalTiles nwTiles (startX, startY) = [[progressTile tile (x,y) | (x, tile) <- zip[0..] row] | (y, row) <- zip[0..] originalTiles]
   where {
@@ -232,8 +276,26 @@ addTiles originalTiles nwTiles (startX, startY) = [[progressTile tile (x,y) | (x
     progressTile tile (curX, curY) = if (curX >= startX && curY >= startY && curX < (startX+ w) && curY < (startY+h))
       then getTile nwTiles (Position (curX-startX) (curY-startY))
       else getTile originalTiles (Position curX curY)
-  }
+  } -}
 
+
+  -- This function places the second [[Tile]] on top of the first [[Tile]] with the (startX,startY) as the offset
+  -- The offset is calculated based on the top left tile in the first [[Tile]] and the second [[Tile]]
+addTiles::[[Tile]]->[[Tile]]->Vector2->[[Tile]]
+-- each tile in the original tiles is progressed and its x and y position are calculated
+addTiles originalTiles nwTiles (startX, startY) = [[progressTile tile (x,y) | (x, tile) <- zip[0..] row] | (y, row) <- zip[0..] originalTiles]
+  where {
+    w = getGridWidth nwTiles;
+    h = getGridHeight nwTiles;
+    -- the progressTile function checks if the tile that is progressed is override with a tile from the nwTiles
+    progressTile::Tile->Vector2->Tile;
+    -- check if the tile from nwTiles is on the location of the Tile from originalTiles with position curX and curY
+    progressTile tile (curX, curY) = if (curX >= startX && curY >= startY && curX < (startX+ w) && curY < (startY+h))
+      --replace the tile with a tile from nwTiles
+      then getTile nwTiles (Position (curX-startX) (curY-startY))
+      --use the tile from originalTiles
+      else getTile originalTiles (Position curX curY)
+  }
 
 -- NOT NEEDED?? RoomId is created when creating a Room!
 {-
