@@ -106,17 +106,17 @@ startRoom3 = createRoom 3 5 5 Open
 startRoom4 = createRoom 4 5 5 Open
 
 
-exampleRoom = runGridBuildersOnRoom startRoom startGen [
+endRoomSimpleCombinators = runGridBuildersOnRoom startRoom startGen [
     gb_makeAllTilesOpen,
     gb_createWall 1 1,
     gb_createWall 3 1,
     gb_createWall 2 3,
-    gb_createWall 1 3,
-    gb_addEntityToTile 1 3 finishEntity,
+    gb_createWall 3 3,
+    gb_addEntityToTile 3 2 finishEntity,
     gb_createBorderAroundRoom
   ]
   where
-    roomId = 3
+    roomId = 6
     startRoom = (createEmptyRoom roomId 5 5)
     finishEntity = createFinishEntity finishId
     finishId = 1
@@ -219,7 +219,7 @@ randomRoom2 = createRandomRoom 3
 randomRoom3 = createRandomRoomWithEnemy 4
 randomRoom4 = createRandomRoom 5
 
-endRoom = runGridBuildersOnRoom endRoom startGen [
+endRoomFoundationalCombinators = runGridBuildersOnRoom endRoom startGen [
     gb_allTiles (con_always True) (tb_editTile (setTileType Solid)),
     gb_randomTile (0,4) (0,4) (tb_editTile (setTileType Open)),
     gb_randomTile (0,4) (0,4) (tb_editTile (setTileType Open)),
@@ -236,10 +236,10 @@ conA = connectRoomDown startRoom randomRoom1
 conB = connectRoomLeft randomRoom1 randomRoom2
 conC = connectRoomUp randomRoom2 randomRoom3
 conD = connectRoomUp randomRoom3 randomRoom4
-conE = connectRoomRight randomRoom4 endRoom
+conE = connectRoomRight randomRoom4 endRoomSimpleCombinators
 
 
-roomedLevel = RoomedLevel "level1" [startRoom,randomRoom1, randomRoom2, randomRoom3, randomRoom4, endRoom] [conA, conB, conC, conD, conE]
+roomedLevel = RoomedLevel "level1" [startRoom,randomRoom1, randomRoom2, randomRoom3, randomRoom4, endRoomSimpleCombinators] [conA, conB, conC, conD, conE]
 
 -- ========== Create the level =======
 levelWithDoors = openCriticalPathRoomedLevel roomedLevel

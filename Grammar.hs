@@ -94,7 +94,8 @@ data Game = Game {
     gameType :: GameType
 } deriving (Show, Generic)
 
-data GameType = FPS| TopDown deriving (Show, Generic)
+data GameType = FPS| TopDown
+  deriving (Show, Generic)
 
 data RoomedLevel = RoomedLevel {
     name:: String,
@@ -131,7 +132,8 @@ data Entity =
         entityType:: EntityType
     } deriving (Show, Generic)
 
-data EntityType = Enemy| Powerup | Player| Finish deriving (Show, Generic)
+data EntityType = Enemy| Powerup | Player| Finish
+  deriving (Show, Generic)
 
 newtype ObjectId = ObjectId {
     objectId :: Int
