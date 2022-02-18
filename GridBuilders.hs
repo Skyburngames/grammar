@@ -1,3 +1,7 @@
+{-
+  This Module the gridBuilders
+-}
+
 module GridBuilders
 (
   runGridBuildersOnRoom,
@@ -10,8 +14,6 @@ import System.Random
 import RandomUtils
 import Conditions
 import TileBuilders
-
-
 
 
 -- ======================================== GRIDBUILDERS ==========================================

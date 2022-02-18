@@ -1,3 +1,7 @@
+{-
+  This Module contains a first draft of 'wrapper' combinators and helper functions, that can be used to wrap the more complex foundational combinators/functions
+-}
+
 module HelperCombinators
 (
   gb_editAllTiles,

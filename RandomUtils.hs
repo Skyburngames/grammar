@@ -16,7 +16,6 @@ import System.Random
 import Grammar
 
 
-
 -- =============================================== Randomness ====================================================== --
 splitStdGen::StdGen->(StdGen,StdGen)
 splitStdGen gen = split gen

@@ -1,3 +1,7 @@
+{-
+    - Contains functionality required to setup room connections in the RoomedLevel-DSL layer
+-}
+
 module RoomConnectionGenerator
 (
   connectRoomRight,
@@ -16,8 +20,7 @@ import Grammar
 import TileModifiers
 import Pathfinder
 
-
-
+-- ------------------ convienient functions to setup connections -----------------------
 connectRoomRight::Room->Room->RoomConnector --places room2 on the right of room1
 connectRoomRight room1 room2 = RoomConnector (roomId room1) (roomId room2) (5,0)
 
@@ -32,8 +35,6 @@ connectRoomDown room1 room2 = RoomConnector (roomId room1) (roomId room2) (0,-5)
 
 
 
-
-
 -- PATHFINDING --
 openCriticalPathRoomedLevel::RoomedLevel->RoomedLevel
 openCriticalPathRoomedLevel roomedLevel = nwRoomedLevel --openCriticalPathRoom on each Room
@@ -41,6 +42,7 @@ openCriticalPathRoomedLevel roomedLevel = nwRoomedLevel --openCriticalPathRoom o
     nwRoomedLevel = RoomedLevel (name roomedLevel) (map (openCriticalPathRoom (roomConnections roomedLevel)) (rooms roomedLevel))
     (roomConnections roomedLevel);
 }
+
 
 openCriticalPathRoom::[RoomConnector]->Room->Room
 -- find all CP in this room, then openCriticalPathTiles from CP-1 to CP-2, CP-1 to CP-3, CP-2 to CP-3 etc

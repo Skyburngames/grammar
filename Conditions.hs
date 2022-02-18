@@ -1,3 +1,7 @@
+{-
+  This Module represents the Conditions, conditions are used to check if a TileData object meets certain criteria
+-}
+
 module Conditions
 (
   con_position,

@@ -1,3 +1,7 @@
+{-
+  This Module represents export DSL-Layer, the data model is exported as an JSON object
+-}
+
 -- Allow ourselves to write Text literals.
 {-# LANGUAGE DeriveGeneric #-} -- must be set BEFORE 'module Main where'
 {-# LANGUAGE OverloadedStrings #-} -- must be set BEFORE 'module Main where'
@@ -39,35 +43,12 @@ data Game = Game {
     gameType :: GameType
 } deriving (Show, Generic)
 
-{-
-data Level = Level {
-    name:: String,
-    rooms:: [JSONParser.Room],
-    roomConnections:: [RoomConnector]
-} deriving (Show, Generic)
--}
 
 data GeneratedLevel = GeneratedLevel {
     name:: String,
     grid:: JSONParser.Grid
 } deriving (Show, Generic)
 
-
-{-
-data Room = Room {
-    roomId:: ObjectId,
-    grid:: JSONParser.Grid
-} deriving (Show, Generic)-}
-
-{-
-data RoomConnector = RoomConnector {
-    room1:: ObjectId,
-    room2:: ObjectId,
-    r1ConnectionPoint::GridPositionJSON,
-    r2ConnectionPoint::GridPositionJSON,
-    aligmentPreference::Alignment
-} deriving (Show, Generic)
--}
 
 data Grid = Grid {
     tiles:: [JSONParser.Tile]
@@ -88,22 +69,14 @@ data GridPositionJSON = GridPositionJSON { -- only used in export to JSON
 } deriving (Show, Generic)
 
 
+
 -- ================================ CONVERT =========================================
 
 convertGame::Grammar.Game->JSONParser.Game
 convertGame game = JSONParser.Game (map convertLevel (Grammar.levels game)) (Grammar.gameType game)
 
---convertLevel::Grammar.Level->JSONParser.Level
---convertLevel level = JSONParser.Level (Grammar.name level) (map convertRoom (Grammar.rooms level)) (Grammar.roomConnections level)   --(map convertRoomConnector (Grammar.roomConnections level))
-
 convertLevel::Grammar.Level->JSONParser.GeneratedLevel
 convertLevel generatedLevel = JSONParser.GeneratedLevel (Grammar.gl_name generatedLevel) (convertGrid (Grammar.gl_grid generatedLevel))
-
---convertRoom::Grammar.Room->JSONParser.Room
---convertRoom room = JSONParser.Room (Grammar.roomId room) (convertGrid (Grammar.grid room))
-
--- convertRoomConnector::Grammar.RoomConnector->JSONParser.RoomConnector
--- convertRoomConnector rc = JSONParser.RoomConnector (Grammar.room1 rc) (Grammar.room2 rc) (Grammar.r1ConnectionPoint rc) (Grammar.r2ConnectionPoint rc) (Grammar.aligmentPreference rc)
 
 convertGrid::Grammar.Grid->JSONParser.Grid
 convertGrid grid = JSONParser.Grid (convert2DTiles (Grammar.tiles grid))
@@ -141,7 +114,41 @@ replacedoubleslash :: String -> String
 replacedoubleslash = unpack . replace "\\" "" . pack
 
 
--- ============================= EXAMPLES =============================
--- data Person = Person { name :: Text, age :: Int } deriving (Show, Generic)
--- instance ToJSON Person
--- instance FromJSON Person
+
+
+
+
+
+-- ================================== obsolete (by design) ==================================
+{-
+data Room = Room {
+    roomId:: ObjectId,
+    grid:: JSONParser.Grid
+} deriving (Show, Generic)-}
+
+{-
+data RoomConnector = RoomConnector {
+    room1:: ObjectId,
+    room2:: ObjectId,
+    r1ConnectionPoint::GridPositionJSON,
+    r2ConnectionPoint::GridPositionJSON,
+    aligmentPreference::Alignment
+} deriving (Show, Generic)
+-}
+
+{-
+data Level = Level {
+    name:: String,
+    rooms:: [JSONParser.Room],
+    roomConnections:: [RoomConnector]
+} deriving (Show, Generic)
+-}
+
+--convertRoom::Grammar.Room->JSONParser.Room
+--convertRoom room = JSONParser.Room (Grammar.roomId room) (convertGrid (Grammar.grid room))
+
+-- convertRoomConnector::Grammar.RoomConnector->JSONParser.RoomConnector
+-- convertRoomConnector rc = JSONParser.RoomConnector (Grammar.room1 rc) (Grammar.room2 rc) (Grammar.r1ConnectionPoint rc) (Grammar.r2ConnectionPoint rc) (Grammar.aligmentPreference rc)
+
+--convertLevel::Grammar.Level->JSONParser.Level
+--convertLevel level = JSONParser.Level (Grammar.name level) (map convertRoom (Grammar.rooms level)) (Grammar.roomConnections level)   --(map convertRoomConnector (Grammar.roomConnections level))

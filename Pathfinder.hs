@@ -1,3 +1,7 @@
+{-
+  This Module contains the (basic) functions used in pathfinding/critical path
+-}
+
 module Pathfinder
 (
   gb_editTilesOnPath,
